@@ -99,7 +99,7 @@ const lastValue = values.length - 1;
       <ul class="vals__grid">
         {
           values.map((v, i) => (
-            <li class={i === lastValue ? 'val val--wide' : 'val'} data-reveal style={`--i:${i % 3}`}>
+            <li class={i === lastValue ? 'val val--wide' : 'val'} data-reveal style={`--i:${i}`}>
               <span class="val__tick" aria-hidden="true" />
               <span class="icobox">
                 <Icon name={v.icon} size={21} />
@@ -294,37 +294,146 @@ const lastValue = values.length - 1;
     row-gap: var(--s-2);
     padding-top: var(--s-5);
     border-top: 1px solid var(--line);
+    transition:
+      border-color var(--d-3) var(--e-out),
+      transform var(--d-3) var(--e-out);
   }
+  .val:hover {
+    border-top-color: var(--accent);
+  }
+
   .val__tick {
     position: absolute;
     top: -1px;
     left: 0;
-    width: 30px;
+    width: 32px;
     height: 2px;
-    background: var(--accent-fill);
+    background: linear-gradient(90deg, var(--gold-400), var(--accent-fill));
+    box-shadow: 0 0 6px rgba(201, 162, 39, 0.4);
     transform-origin: 0 50%;
-    animation: valTick var(--d-4) var(--e-out) both;
-    animation-delay: calc(var(--i, 0) * 90ms + 0.1s);
+    transition:
+      width 0.35s var(--e-out),
+      box-shadow 0.35s var(--e-out),
+      background 0.35s var(--e-out);
   }
-  @keyframes valTick {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
+  .val:hover .val__tick {
+    width: 52px;
+    box-shadow: 0 0 12px rgba(201, 162, 39, 0.7);
+    background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
   }
+
   .val .icobox {
     grid-row: span 2;
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      transform var(--d-2) var(--e-out),
+      box-shadow var(--d-2) var(--e-out);
   }
+  .val:hover .icobox {
+    transition-delay: 0s !important;
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 4px 12px rgba(201, 162, 39, 0.18);
+  }
+
   .val__title {
     align-self: center;
+    transition: color var(--d-2) var(--e-out);
   }
+  .val:hover .val__title {
+    color: var(--accent);
+  }
+
   .val__text {
     grid-column: 2;
     font-size: var(--fs-sm);
     line-height: 1.6;
     color: var(--fg-mute);
+  }
+
+  /* ---------- Animação fluida e orquestrada dos valores ---------- */
+  :global(html.js) .val[data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition:
+      opacity 0.65s var(--e-out) calc(var(--i, 0) * 85ms),
+      transform 0.65s var(--e-out) calc(var(--i, 0) * 85ms);
+  }
+  :global(html.js) .val[data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* O traço dourado desenha da esquerda para a direita quando o card entra */
+  :global(html.js) .val .val__tick {
+    transform: scaleX(0);
+    transition:
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 85ms + 0.12s),
+      width 0.35s var(--e-out),
+      box-shadow 0.35s var(--e-out);
+  }
+  :global(html.js) .val.is-in .val__tick {
+    transform: scaleX(1);
+  }
+
+  /* O ícone faz um pop sutil e suave */
+  :global(html.js) .val .icobox {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+    transition:
+      opacity 0.5s var(--e-out) calc(var(--i, 0) * 85ms + 0.08s),
+      transform 0.5s var(--e-out) calc(var(--i, 0) * 85ms + 0.08s),
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out);
+  }
+  :global(html.js) .val.is-in .icobox {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* O título sobe suavemente */
+  :global(html.js) .val .val__title {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.5s var(--e-out) calc(var(--i, 0) * 85ms + 0.12s),
+      transform 0.5s var(--e-out) calc(var(--i, 0) * 85ms + 0.12s),
+      color var(--d-2) var(--e-out);
+  }
+  :global(html.js) .val.is-in .val__title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* O texto descritivo completa a revelação */
+  :global(html.js) .val .val__text {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.55s var(--e-out) calc(var(--i, 0) * 85ms + 0.16s),
+      transform 0.55s var(--e-out) calc(var(--i, 0) * 85ms + 0.16s);
+  }
+  :global(html.js) .val.is-in .val__text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Redes de segurança — acessibilidade e fallback */
+  :global(html.motion-failed) .val,
+  :global(html.motion-reduced) .val,
+  :global(html.motion-failed) .val .val__tick,
+  :global(html.motion-reduced) .val .val__tick,
+  :global(html.motion-failed) .val .icobox,
+  :global(html.motion-reduced) .val .icobox,
+  :global(html.motion-failed) .val .val__title,
+  :global(html.motion-reduced) .val .val__title,
+  :global(html.motion-failed) .val .val__text,
+  :global(html.motion-reduced) .val .val__text {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   /* --------------------------- ficha / equipe ----------------------- */
