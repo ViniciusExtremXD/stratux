@@ -123,22 +123,29 @@ import { brand, contact, waDefault } from '~/data/site';
     position: relative;
     display: grid;
     place-items: center;
+    align-self: stretch;
   }
   .hero__artinner {
     position: relative;
     width: min(100%, 520px);
-    display: grid;
-    gap: clamp(1.25rem, 0.8rem + 1.6vw, 2rem);
-    justify-items: center;
-    padding: clamp(1.75rem, 1rem + 2.6vw, 2.75rem) clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: clamp(1.5rem, 1rem + 1.8vw, 2.5rem);
+    align-items: center;
+    padding: clamp(2rem, 1.2rem + 2.5vw, 3.5rem) clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    background: linear-gradient(165deg, rgba(14, 23, 38, 0.97) 0%, rgba(8, 13, 22, 0.99) 100%);
+    border: 1px solid rgba(201, 162, 39, 0.32);
+    border-radius: var(--r-4);
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   .hero__artinner::before {
     content: '';
     position: absolute;
     inset: 0;
-    border: 1px solid rgba(201, 162, 39, 0.22);
-    border-radius: var(--r-4);
-    background: radial-gradient(74% 62% at 50% 30%, rgba(46, 80, 116, 0.34), transparent 72%);
+    border-radius: inherit;
+    background: radial-gradient(70% 50% at 50% 25%, rgba(46, 80, 116, 0.22), transparent 75%);
+    pointer-events: none;
   }
   .hero :global(.hero__lockup) {
     position: relative;
@@ -149,10 +156,10 @@ import { brand, contact, waDefault } from '~/data/site';
     position: relative;
     width: 100%;
     height: auto;
-    opacity: 0.92;
+    opacity: 0.95;
   }
   .hero__bars rect {
-    fill: rgba(194, 203, 212, 0.16);
+    fill: rgba(194, 203, 212, 0.32);
     transform-box: fill-box;
     transform-origin: 50% 100%;
     animation: barRise var(--d-5) var(--e-out) both;
@@ -223,6 +230,10 @@ import { brand, contact, waDefault } from '~/data/site';
   @media (min-width: 900px) {
     .hero__inner {
       grid-template-columns: 1.08fr 0.92fr;
+      align-items: stretch;
+    }
+    .hero__artinner {
+      height: 100%;
     }
   }
   @media (max-width: 899px) {
