@@ -170,12 +170,16 @@ const description =
               <li>
                 <Icon name="pin" size={15} />
                 <span>
-                  {addr.street}, {addr.complement} — {addr.city}/{addr.state} — CEP {addr.zip}
+                  {addr.street}, {addr.complement} — {addr.neighborhood}, {addr.city}/{addr.state} — CEP {addr.zip}
                 </span>
               </li>
               <li>
                 <Icon name="phone" size={15} />
                 <span>Telefone e WhatsApp: {contact.phoneLabel}</span>
+              </li>
+              <li>
+                <Icon name="mail" size={15} />
+                <span>E-mail: {contact.email}</span>
               </li>
             </ul>
           </div>

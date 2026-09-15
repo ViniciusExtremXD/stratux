@@ -126,16 +126,17 @@ const waTestimonial = wa(
             <dd class="ficha__v num">{brand.cnpj}</dd>
           </div>
           <div class="ficha__row">
-            <dt class="ficha__k">Sede</dt>
-            <dd class="ficha__v">{addr.street} — {addr.city}/{addr.state}</dd>
+            <dt class="ficha__k">Sede Matriz</dt>
+            <dd class="ficha__v">{addr.street}, {addr.complement} — {addr.city}/{addr.state}</dd>
           </div>
           <div class="ficha__row">
             <dt class="ficha__k">Registro profissional</dt>
             <dd class="ficha__v">
-              {/* TODO cliente: número do CRC-SP e responsável técnico */}
               {
                 legal.crc ? (
-                  <span>{legal.crc}</span>
+                  <span>
+                    Alvará CRC-SP {legal.crc} · RT {legal.technicalLead} ({legal.crcLead})
+                  </span>
                 ) : (
                   <span class="ficha__pending">
                     <Icon name="clock" size={14} />

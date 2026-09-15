@@ -15,7 +15,7 @@ const addr = legal.address;
         <Logo variant="full" size={40} tagline motto />
         <p class="foot__blurb">
           Contabilidade e consultoria para pessoa física, MEI e empresas. Matriz em São Paulo,
-          atendimento em Osasco, Jundiaí e Santos.
+          atendimento em Osasco, Jundiaí e Sorocaba.
         </p>
         <a class="btn btn--gold" href={waDefault} target="_blank" rel="noopener">
           <Icon name="whatsapp" size={17} class="btn__ico" />
@@ -74,8 +74,13 @@ const addr = legal.address;
           <li class="foot__addr">
             <Icon name="pin" size={15} />
             <span>
-              {addr.street}, {addr.complement}<br />
-              {addr.city} — {addr.state}, CEP {addr.zip}
+              {addr.street && (
+                <>
+                  {addr.street}{addr.complement ? `, ${addr.complement}` : ''}
+                  <br />
+                </>
+              )}
+              {addr.neighborhood ? `${addr.neighborhood} — ` : ''}{addr.city}/{addr.state}{addr.zip ? `, CEP ${addr.zip}` : ''}
             </span>
           </li>
         </ul>
@@ -86,7 +91,8 @@ const addr = legal.address;
       <div class="foot__legalmain">
         <p class="foot__legalname">{brand.legalName}</p>
         <p class="foot__cnpj">CNPJ {brand.cnpj}</p>
-        {legal.crc && <p class="foot__cnpj">{legal.crc}</p>}
+        {legal.crc && <p class="foot__cnpj">Alvará CRC-SP {legal.crc}</p>}
+        {legal.technicalLead && <p class="foot__cnpj">RT: {legal.technicalLead} ({legal.crcLead})</p>}
       </div>
       <div class="foot__legalside">
         <a href={`${base}/politica-de-privacidade`}>Política de privacidade</a>

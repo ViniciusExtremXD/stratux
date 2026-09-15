@@ -22,8 +22,7 @@ export const contact = {
   phoneLabel: '(11) 98415-8253',
   phoneE164: '+5511984158253',
   whatsappNumber: '5511984158253',
-  /** TODO cliente: confirmar e-mail comercial. */
-  email: null as string | null,
+  email: 'edson@stratuxconsultoria.com.br',
   responseTime: 'Respondemos em até 1 dia útil.',
 } as const;
 
@@ -38,16 +37,20 @@ export const waDefault = wa(
 
 export const legal = {
   address: {
-    street: 'Rua Padre Adelino, 424',
-    complement: 'Apto 167',
+    street: 'Av. Eng. Luís Carlos Berrini, 1748',
+    complement: 'Sala 2103',
+    neighborhood: 'Cidade Monções',
     city: 'São Paulo',
     state: 'SP',
-    zip: '03303-000',
+    zip: '04571-000',
     country: 'BR',
   },
-  /** TODO cliente: responsável técnico e registro no CRC-SP. */
-  crc: null as string | null,
-  technicalLead: null as string | null,
+  /** Alvará da organização contábil no CRC-SP. */
+  crc: '2SP053007/O-4',
+  /** Registro profissional do responsável técnico. */
+  crcLead: "1CE027079/O-4 'T' SP",
+  technicalLead: 'Benedito Edson Santiago Barbosa',
+  technicalLeadShort: 'Edson Santiago',
 } as const;
 
 export const regions = [
@@ -55,41 +58,37 @@ export const regions = [
     id: 'sp',
     city: 'São Paulo',
     role: 'Matriz',
-    covers: 'Capital e Zona Leste',
-    detail: 'Rua Padre Adelino, 424 — Belenzinho, São Paulo/SP',
-    /** Endereço completo e verificável — vira o pino exato no mapa. */
-    mapQuery: 'Rua Padre Adelino, 424, Belenzinho, São Paulo - SP, 03303-000',
+    covers: 'Capital / Berrini e Região Metropolitana',
+    detail: 'Av. Eng. Luís Carlos Berrini, 1748 — Sala 2103, Cidade Monções',
+    mapQuery: 'Av. Eng. Luís Carlos Berrini, 1748, Cidade Monções, São Paulo - SP, 04571-000',
     hasAddress: true,
   },
   {
     id: 'osasco',
     city: 'Osasco',
     role: 'Atendimento',
-    covers: 'Grande SP / Capital',
-    detail: 'Região metropolitana e Oeste da capital',
-    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
-    mapQuery: 'Osasco, SP',
-    hasAddress: false,
+    covers: 'Grande SP / Oeste',
+    detail: 'Av. dos Autonomistas, 2561 — Sala 15, Centro',
+    mapQuery: 'Av. dos Autonomistas, 2561, Centro, Osasco - SP, 06090-020',
+    hasAddress: true,
   },
   {
     id: 'jundiai',
     city: 'Jundiaí',
     role: 'Atendimento',
-    covers: 'Interior',
-    detail: 'Eixo empresarial Anhanguera–Bandeirantes',
-    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
-    mapQuery: 'Jundiaí, SP',
-    hasAddress: false,
+    covers: 'Interior / Eixo Anhanguera',
+    detail: 'Rua Anchieta, 164 — Salas 102 e 107, Vila Boaventura',
+    mapQuery: 'Rua Anchieta, 164, Vila Boaventura, Jundiaí - SP, 13201-804',
+    hasAddress: true,
   },
   {
-    id: 'santos',
-    city: 'Santos',
+    id: 'sorocaba',
+    city: 'Sorocaba',
     role: 'Atendimento',
-    covers: 'Litoral',
-    detail: 'Baixada Santista e porto',
-    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
-    mapQuery: 'Santos, SP',
-    hasAddress: false,
+    covers: 'Região Metropolitana de Sorocaba',
+    detail: 'Rua Raphael Dias da Silva, 75 — Sala 308, Parque Campolim',
+    mapQuery: 'Rua Raphael Dias da Silva, 75, Parque Campolim, Sorocaba - SP, 18048-120',
+    hasAddress: true,
   },
 ] as const;
 
@@ -382,7 +381,7 @@ export const serviceAreas: ServiceArea[] = [
       },
       {
         label: 'Obrigações acessórias trabalhistas',
-        blurb: 'eSocial, FGTS Digital, DCTFWeb e CAGED dentro dos prazos legais.',
+        blurb: 'eSocial, FGTS Digital e DCTFWeb dentro dos prazos legais.',
       },
       { label: 'Férias', blurb: 'Programação, cálculo do terço constitucional e pagamento até dois dias antes do início.' },
       { label: '13º salário', blurb: 'Primeira parcela até 30 de novembro, segunda até 20 de dezembro, com os encargos.' },
@@ -471,22 +470,23 @@ export const monthlyObligations: Obligation[] = [
   { name: 'Salários', day: 5, who: '5º dia útil', profiles: ['empresa', 'mei'], note: 'Pagamento da folha do mês anterior.' },
   { name: 'EFD-Contribuições', day: 10, who: 'Lucro Real e Presumido', profiles: ['empresa'], note: 'Até o 10º dia útil do 2º mês seguinte.' },
   { name: 'ISS', day: 10, who: 'Prestadores de serviço', profiles: ['empresa'], note: 'Em São Paulo capital, dia 10. Varia por município.' },
-  { name: 'eSocial e DCTFWeb', day: 15, who: 'Quem tem folha', profiles: ['empresa', 'mei'], note: 'Fechamento da folha e confissão dos débitos previdenciários.' },
+  { name: 'eSocial', day: 15, who: 'Quem tem folha', profiles: ['empresa', 'mei'], note: 'Fechamento e envio dos eventos periódicos da folha do mês anterior.' },
   { name: 'DAS — Simples Nacional', day: 20, who: 'Optantes do Simples', profiles: ['empresa'], note: 'Guia única do faturamento do mês anterior.' },
   { name: 'DAS-SIMEI', day: 20, who: 'MEI', profiles: ['mei'], note: 'Valor fixo mensal. É ele que garante o seu INSS.' },
   { name: 'FGTS Digital', day: 20, who: 'Quem tem funcionário', profiles: ['empresa', 'mei'], note: 'Depósito do mês anterior via FGTS Digital.' },
   { name: 'IRRF e INSS', day: 20, who: 'Retenções da folha', profiles: ['empresa'], note: 'Recolhimento das retenções do mês anterior.' },
+  { name: 'SPED Fiscal (EFD ICMS/IPI)', day: 20, who: 'Contribuintes de ICMS', profiles: ['empresa'], note: 'Em São Paulo, dia 20 do mês seguinte.' },
+  { name: 'DCTFWeb', day: 30, who: 'Quem tem folha e retenções', profiles: ['empresa', 'mei'], note: 'Confissão de débitos previdenciários e fiscais, até o último dia útil do mês seguinte.' },
   { name: 'Carnê-leão', day: 30, who: 'Pessoa física', profiles: ['pf'], note: 'Último dia útil do mês seguinte ao recebimento.' },
   { name: 'DARF de renda variável', day: 30, who: 'Investidores', profiles: ['pf'], note: 'Último dia útil do mês seguinte à apuração do ganho.' },
-  { name: 'SPED Fiscal (EFD ICMS/IPI)', day: 20, who: 'Contribuintes de ICMS', profiles: ['empresa'], note: 'Em São Paulo, dia 20 do mês seguinte.' },
 ];
 
 export const annualObligations: Obligation[] = [
   { name: 'DEFIS', day: 31, month: 3, who: 'Empresas do Simples', profiles: ['empresa'], note: 'Declaração de informações socioeconômicas e fiscais do ano anterior.' },
   { name: 'IRPF', day: 30, month: 5, who: 'Pessoa física', profiles: ['pf'], note: 'Prazo costuma ir de março ao fim de maio. Confirme a data do ano.' },
   { name: 'DASN-SIMEI', day: 31, month: 5, who: 'MEI', profiles: ['mei'], note: 'Declaração anual do faturamento do MEI.' },
-  { name: 'ECD', day: 31, month: 5, who: 'Lucro Real e Presumido', profiles: ['empresa'], note: 'Escrituração contábil digital, último dia útil de maio.' },
-  { name: 'ECF', day: 31, month: 7, who: 'Todas as PJ', profiles: ['empresa'], note: 'Escrituração contábil fiscal, último dia útil de julho.' },
+  { name: 'ECD', day: 30, month: 6, who: 'Empresas obrigadas à ECD', profiles: ['empresa'], note: 'Escrituração contábil digital, último dia útil de junho.' },
+  { name: 'ECF', day: 31, month: 7, who: 'Pessoas jurídicas obrigadas à ECF', profiles: ['empresa'], note: 'Escrituração contábil fiscal, último dia útil de julho.' },
   { name: '13º — 1ª parcela', day: 30, month: 11, who: 'Quem tem funcionário', profiles: ['empresa', 'mei'], note: 'Adiantamento de metade do 13º salário.' },
   { name: '13º — 2ª parcela', day: 20, month: 12, who: 'Quem tem funcionário', profiles: ['empresa', 'mei'], note: 'Saldo do 13º com os descontos de INSS e IRRF.' },
 ];
@@ -619,7 +619,7 @@ export const faq = [
   },
   {
     q: 'Vocês atendem fora de São Paulo?',
-    a: 'Sim. A matriz fica na capital e temos atendimento em Osasco, Jundiaí e Santos. Todo o trabalho é digital, então atendemos clientes em qualquer cidade do país.',
+    a: 'Sim. A matriz fica na capital e temos unidades em Osasco, Jundiaí e Sorocaba. Todo o trabalho é digital, então atendemos clientes em qualquer cidade do país.',
   },
   {
     q: 'Quanto custa a contabilidade da minha empresa?',
@@ -645,6 +645,6 @@ export const disclaimerText =
 export const seo = {
   title: 'Stratux Consultoria Empresarial — Contabilidade em São Paulo',
   description:
-    'Contabilidade para pessoa física, MEI e empresas em São Paulo, Osasco, Jundiaí e Santos. Abertura de empresa, imposto de renda, folha de pagamento e planejamento tributário.',
+    'Contabilidade para pessoa física, MEI e empresas em São Paulo, Osasco, Jundiaí e Sorocaba. Abertura de empresa, imposto de renda, folha de pagamento e planejamento tributário.',
   locale: 'pt_BR',
 } as const;

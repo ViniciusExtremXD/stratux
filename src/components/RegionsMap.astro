@@ -72,9 +72,7 @@ const waRegiao = wa(
             {
               regions.map((r) => (
                 <span class="mapa__capitem" data-mapa-cap={r.id}>
-                  {r.hasAddress
-                    ? `${r.detail} · ${addr.city}/${addr.state}, CEP ${addr.zip}`
-                    : `Pino de referência da cidade — endereço completo desta praça a confirmar com o cliente.`}
+                  {r.detail} · {r.city}/SP
                 </span>
               ))
             }
@@ -266,33 +264,33 @@ const waRegiao = wa(
   .regioes__gate:has(#regiao-sp:checked) [data-mapa='sp'],
   .regioes__gate:has(#regiao-osasco:checked) [data-mapa='osasco'],
   .regioes__gate:has(#regiao-jundiai:checked) [data-mapa='jundiai'],
-  .regioes__gate:has(#regiao-santos:checked) [data-mapa='santos'] {
+  .regioes__gate:has(#regiao-sorocaba:checked) [data-mapa='sorocaba'] {
     opacity: 1;
     pointer-events: auto;
   }
   .regioes__gate:has(#regiao-sp:checked) [data-mapa-cap='sp'],
   .regioes__gate:has(#regiao-osasco:checked) [data-mapa-cap='osasco'],
   .regioes__gate:has(#regiao-jundiai:checked) [data-mapa-cap='jundiai'],
-  .regioes__gate:has(#regiao-santos:checked) [data-mapa-cap='santos'] {
+  .regioes__gate:has(#regiao-sorocaba:checked) [data-mapa-cap='sorocaba'] {
     display: block;
   }
   .regioes__gate:has(#regiao-sp:checked) .praca[for='regiao-sp'],
   .regioes__gate:has(#regiao-osasco:checked) .praca[for='regiao-osasco'],
   .regioes__gate:has(#regiao-jundiai:checked) .praca[for='regiao-jundiai'],
-  .regioes__gate:has(#regiao-santos:checked) .praca[for='regiao-santos'] {
+  .regioes__gate:has(#regiao-sorocaba:checked) .praca[for='regiao-sorocaba'] {
     border-color: var(--accent);
     box-shadow: var(--sh-2);
   }
   .regioes__gate:has(#regiao-sp:checked) .praca[for='regiao-sp'] .card__rule,
   .regioes__gate:has(#regiao-osasco:checked) .praca[for='regiao-osasco'] .card__rule,
   .regioes__gate:has(#regiao-jundiai:checked) .praca[for='regiao-jundiai'] .card__rule,
-  .regioes__gate:has(#regiao-santos:checked) .praca[for='regiao-santos'] .card__rule {
+  .regioes__gate:has(#regiao-sorocaba:checked) .praca[for='regiao-sorocaba'] .card__rule {
     opacity: 1;
   }
   .regioes__gate:has(#regiao-sp:checked) .praca[for='regiao-sp'] .praca__go,
   .regioes__gate:has(#regiao-osasco:checked) .praca[for='regiao-osasco'] .praca__go,
   .regioes__gate:has(#regiao-jundiai:checked) .praca[for='regiao-jundiai'] .praca__go,
-  .regioes__gate:has(#regiao-santos:checked) .praca[for='regiao-santos'] .praca__go {
+  .regioes__gate:has(#regiao-sorocaba:checked) .praca[for='regiao-sorocaba'] .praca__go {
     color: var(--accent);
   }
 
@@ -300,7 +298,7 @@ const waRegiao = wa(
   .regioes__gate:has(#regiao-sp:focus-visible) .praca[for='regiao-sp'],
   .regioes__gate:has(#regiao-osasco:focus-visible) .praca[for='regiao-osasco'],
   .regioes__gate:has(#regiao-jundiai:focus-visible) .praca[for='regiao-jundiai'],
-  .regioes__gate:has(#regiao-santos:focus-visible) .praca[for='regiao-santos'] {
+  .regioes__gate:has(#regiao-sorocaba:focus-visible) .praca[for='regiao-sorocaba'] {
     outline: 2px solid var(--gold-600);
     outline-offset: 3px;
   }

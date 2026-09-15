@@ -84,15 +84,33 @@ const stats: Stat[] = [
         <span>CNPJ {brand.cnpj}</span>
         <span class="cred__dot" aria-hidden="true">·</span>
         <span>{matriz.role}: {matriz.detail}</span>
-        <span class="cred__dot" aria-hidden="true">·</span>
-        <span>CEP {legal.address.zip}</span>
+        {
+          legal.address.zip && (
+            <>
+              <span class="cred__dot" aria-hidden="true">
+                ·
+              </span>
+              <span>CEP {legal.address.zip}</span>
+            </>
+          )
+        }
         {
           legal.crc && (
             <>
               <span class="cred__dot" aria-hidden="true">
                 ·
               </span>
-              <span>{legal.crc}</span>
+              <span>Alvará CRC-SP {legal.crc}</span>
+            </>
+          )
+        }
+        {
+          legal.technicalLead && (
+            <>
+              <span class="cred__dot" aria-hidden="true">
+                ·
+              </span>
+              <span>RT {legal.technicalLead} ({legal.crcLead})</span>
             </>
           )
         }
