@@ -1,0 +1,478 @@
+---
+import Icon from '~/components/Icon.astro';
+import { profiles, serviceAreas, wa } from '~/data/site';
+
+/**
+ * Peça central do site: o seletor de perfil filtra toda a seção de serviços.
+ * Funciona sem JavaScript — são radios reais + :has(). O script apenas
+ * lembra a escolha na sessão e move o foco.
+ */
+const gates = [{ id: 'todos', label: 'Ver tudo', short: 'Tudo' }, ...profiles];
+---
+
+<div class="gate">
+  {/* controles reais: sem JS continuam funcionando */}
+  <fieldset class="gate__inputs sr-only">
+    <legend>Escolha o seu perfil</legend>
+    {
+      gates.map((g, i) => (
+        <input
+          type="radio"
+          name="perfil"
+          id={`perfil-${g.id}`}
+          value={g.id}
+          checked={i === 0}
+        />
+      ))
+    }
+  </fieldset>
+
+  <!-- ------------------------------ PERFIL ------------------------------ -->
+  <section class="section section--tight perfil" id="perfil" aria-labelledby="perfil-h">
+    <div class="shell">
+      <div class="sechead sechead--center">
+        <p class="kicker" data-reveal="fade">Por onde começar</p>
+        <h2 class="h2" id="perfil-h" data-split>Escolha o seu perfil e veja só o que importa.</h2>
+        <p class="lead" data-reveal style="--i:1">
+          São mais de cinquenta serviços. Em vez de varrer a lista inteira, diga quem é você — a
+          seção de serviços se reorganiza na hora.
+        </p>
+      </div>
+
+      <div class="perfil__doors">
+        {
+          profiles.map((p, i) => (
+            <label class="door card card--hover" for={`perfil-${p.id}`} data-reveal style={`--i:${i}`}>
+              <span class="card__rule" aria-hidden="true" />
+              <span class="icobox">
+                <Icon name={p.icon} size={21} />
+              </span>
+              <span class="door__label h4">{p.label}</span>
+              <span class="door__q">{p.question}</span>
+              <span class="door__blurb">{p.blurb}</span>
+              <span class="door__go">
+                <span>Ver serviços</span>
+                <Icon name="arrowUpRight" size={15} />
+              </span>
+            </label>
+          ))
+        }
+      </div>
+
+      <p class="perfil__all" data-reveal="fade" style="--i:3">
+        <label class="perfil__alllabel" for="perfil-todos">
+          <Icon name="ledger" size={15} />
+          <span>Prefiro ver todos os serviços</span>
+        </label>
+      </p>
+    </div>
+  </section>
+
+  <!-- ----------------------------- SERVIÇOS ----------------------------- -->
+  <section class="section servicos" id="servicos" aria-labelledby="servicos-h">
+    <div class="shell">
+      <div class="sechead">
+        <p class="kicker" data-reveal="fade">Serviços</p>
+        <h2 class="h2" id="servicos-h" data-split>Tudo o que a sua contabilidade precisa ter.</h2>
+        <p class="lead" data-reveal style="--i:1">
+          Seis áreas de atuação, sem terceirizar o que é técnico. Cada item abaixo é um serviço que
+          executamos por dentro — e explicamos em uma linha o que ele resolve.
+        </p>
+      </div>
+
+      <div class="servicos__filterbar" data-reveal="fade">
+        <span class="servicos__filterlabel">Exibindo:</span>
+        <div class="servicos__chips" role="group" aria-label="Filtrar serviços por perfil">
+          {
+            gates.map((g) => (
+              <label class="chip" for={`perfil-${g.id}`} data-chip={g.id}>
+                {'short' in g ? g.short : g.label}
+              </label>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="servicos__grid">
+        {
+          serviceAreas.map((area, i) => (
+            <article
+              class="area card card--hover"
+              data-profiles={area.profiles.join(' ')}
+              data-reveal
+              style={`--i:${i % 2}`}
+              aria-labelledby={`area-${area.id}`}
+            >
+              <span class="card__rule" aria-hidden="true" />
+              <header class="area__head">
+                <span class="icobox">
+                  <Icon name={area.icon} size={21} />
+                </span>
+                <div>
+                  <h3 class="h3 area__title" id={`area-${area.id}`}>
+                    {area.title}
+                  </h3>
+                  <p class="area__summary">{area.summary}</p>
+                </div>
+              </header>
+
+              <ul class="area__items">
+                {area.items.map((it) => (
+                  <li class="item">
+                    <span class="item__mark" aria-hidden="true">
+                      <Icon name="arrow" size={13} />
+                    </span>
+                    <div>
+                      <span class="item__label">{it.label}</span>
+                      <span class="item__blurb">{it.blurb}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                class="area__cta"
+                href={wa(`Olá! Vim pelo site da Stratux e quero falar sobre ${area.title}.`)}
+                target="_blank"
+                rel="noopener"
+              >
+                <Icon name="whatsapp" size={15} />
+                <span>Falar sobre {area.shortTitle.toLowerCase()}</span>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+
+      <p class="servicos__empty" role="status">
+        Nenhuma área corresponde a esse perfil.
+        <label for="perfil-todos">Ver todos os serviços</label>.
+      </p>
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var gate = document.querySelector('.gate');
+    if (!gate) return;
+    var KEY = 'stratux:perfil';
+    var radios = gate.querySelectorAll('input[name="perfil"]');
+    try {
+      var saved = sessionStorage.getItem(KEY);
+      if (saved) {
+        var el = gate.querySelector('#perfil-' + saved);
+        if (el) el.checked = true;
+      }
+    } catch (e) {}
+    radios.forEach(function (r) {
+      r.addEventListener('change', function () {
+        try {
+          sessionStorage.setItem(KEY, r.value);
+        } catch (e) {}
+      });
+    });
+    // clicar numa porta leva o leitor até os serviços
+    gate.querySelectorAll('.door, .perfil__alllabel').forEach(function (d) {
+      d.addEventListener('click', function () {
+        window.setTimeout(function () {
+          var t = document.getElementById('servicos');
+          if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
+      });
+    });
+  })();
+</script>
+
+<style>
+  /* ---------- filtro sem JavaScript ---------- */
+  .gate__inputs {
+    border: 0;
+    padding: 0;
+  }
+
+  .gate:has(#perfil-pf:checked) .area:not([data-profiles~='pf']),
+  .gate:has(#perfil-mei:checked) .area:not([data-profiles~='mei']),
+  .gate:has(#perfil-empresa:checked) .area:not([data-profiles~='empresa']) {
+    display: none;
+  }
+
+  /* porta marcada */
+  .gate:has(#perfil-pf:checked) .door[for='perfil-pf'],
+  .gate:has(#perfil-mei:checked) .door[for='perfil-mei'],
+  .gate:has(#perfil-empresa:checked) .door[for='perfil-empresa'] {
+    border-color: var(--accent);
+    box-shadow: var(--sh-3);
+  }
+  .gate:has(#perfil-pf:checked) .door[for='perfil-pf'] .card__rule,
+  .gate:has(#perfil-mei:checked) .door[for='perfil-mei'] .card__rule,
+  .gate:has(#perfil-empresa:checked) .door[for='perfil-empresa'] .card__rule {
+    opacity: 1;
+  }
+  .gate:has(#perfil-pf:checked) .door[for='perfil-pf'] .icobox,
+  .gate:has(#perfil-mei:checked) .door[for='perfil-mei'] .icobox,
+  .gate:has(#perfil-empresa:checked) .door[for='perfil-empresa'] .icobox {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  /* chip marcado */
+  .gate:has(#perfil-todos:checked) .chip[data-chip='todos'],
+  .gate:has(#perfil-pf:checked) .chip[data-chip='pf'],
+  .gate:has(#perfil-mei:checked) .chip[data-chip='mei'],
+  .gate:has(#perfil-empresa:checked) .chip[data-chip='empresa'] {
+    background: var(--navy-900);
+    border-color: var(--navy-900);
+    color: var(--silver-100);
+  }
+
+  /* foco por teclado chega ao rótulo */
+  .gate__inputs input:focus-visible ~ * {
+    outline: none;
+  }
+  #perfil-pf:focus-visible ~ #perfil-mei,
+  .gate:has(#perfil-pf:focus-visible) .door[for='perfil-pf'],
+  .gate:has(#perfil-mei:focus-visible) .door[for='perfil-mei'],
+  .gate:has(#perfil-empresa:focus-visible) .door[for='perfil-empresa'],
+  .gate:has(#perfil-todos:focus-visible) .perfil__alllabel {
+    outline: 2px solid var(--gold-600);
+    outline-offset: 3px;
+  }
+
+  /* ---------- perfil ---------- */
+  .perfil {
+    background: var(--bone-dim);
+    border-block: 1px solid var(--line);
+  }
+  .perfil__doors {
+    display: grid;
+    gap: var(--s-5);
+    grid-template-columns: 1fr;
+  }
+  .door {
+    display: grid;
+    gap: var(--s-3);
+    cursor: pointer;
+    align-content: start;
+  }
+  .door__label {
+    margin-top: var(--s-1);
+  }
+  .door__q {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.45;
+  }
+  .door__blurb {
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    line-height: 1.6;
+  }
+  .door__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: var(--s-2);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  .door__go :global(svg) {
+    transition: transform var(--d-2) var(--e-out);
+  }
+  .door:hover .door__go :global(svg) {
+    transform: translate(2px, -2px);
+  }
+
+  .perfil__all {
+    margin-top: var(--s-5);
+    text-align: center;
+  }
+  .perfil__alllabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--fg-mute);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition:
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .perfil__alllabel:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .gate:has(#perfil-todos:checked) .perfil__all {
+    opacity: 0.45;
+  }
+
+  /* ---------- serviços ---------- */
+  .servicos__filterbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+    margin-bottom: var(--s-6);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .servicos__filterlabel {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .servicos__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .chip {
+    padding: 0.42rem 0.85rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-soft);
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition:
+      background var(--d-2) var(--e-out),
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .servicos__grid {
+    display: grid;
+    gap: var(--s-5);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .area {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+  }
+  .area__head {
+    display: flex;
+    gap: var(--s-4);
+    align-items: flex-start;
+  }
+  .area__title {
+    margin-bottom: 0.35rem;
+  }
+  .area__summary {
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    line-height: 1.55;
+  }
+  .area__items {
+    display: grid;
+    gap: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .item {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+  }
+  .item__mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    color: var(--accent);
+    opacity: 0.8;
+  }
+  .item__label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .item__blurb {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-mute);
+  }
+  .area__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    padding: 0.6rem 1rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .area__cta :global(svg) {
+    color: var(--accent);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .area__cta:hover {
+    background: var(--navy-900);
+    border-color: var(--navy-900);
+    color: var(--silver-100);
+  }
+  .area__cta:hover :global(svg) {
+    color: var(--gold-400);
+  }
+
+  .servicos__empty {
+    display: none;
+    margin-top: var(--s-5);
+    padding: var(--s-5);
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-3);
+  }
+  .servicos__empty label {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .servicos__grid:not(:has(.area:not([style*='display: none']))) {
+    display: none;
+  }
+
+  @media (min-width: 720px) {
+    .perfil__doors {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 980px) {
+    .servicos__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--s-6);
+    }
+  }
+</style>

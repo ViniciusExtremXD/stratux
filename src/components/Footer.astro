@@ -1,0 +1,253 @@
+---
+import Logo from '~/components/Logo.astro';
+import Icon from '~/components/Icon.astro';
+import { brand, contact, legal, regions, nav, waDefault } from '~/data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const year = 2026;
+const addr = legal.address;
+---
+
+<footer class="foot on-navy navy-field">
+  <div class="shell shell--wide">
+    <div class="foot__top">
+      <div class="foot__brand" data-reveal>
+        <Logo variant="full" size={40} tagline motto />
+        <p class="foot__blurb">
+          Contabilidade e consultoria para pessoa física, MEI e empresas. Matriz em São Paulo,
+          atendimento em Osasco, Jundiaí e Santos.
+        </p>
+        <a class="btn btn--gold" href={waDefault} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={17} class="btn__ico" />
+          <span>Falar no WhatsApp</span>
+        </a>
+      </div>
+
+      <nav class="foot__col" aria-label="Rodapé — seções" data-reveal style="--i:1">
+        <h2 class="foot__h">Seções</h2>
+        <ul>
+          {nav.map((n) => (
+            <li><a href={n.href}>{n.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="foot__col" data-reveal style="--i:2">
+        <h2 class="foot__h">Atendimento</h2>
+        <ul>
+          {
+            regions.map((r) => (
+              <li>
+                <span class="foot__city">{r.city}</span>
+                <span class="foot__covers">{r.covers}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <address class="foot__col foot__col--contact" data-reveal style="--i:3">
+        <h2 class="foot__h">Contato</h2>
+        <ul>
+          <li>
+            <a href={`tel:${contact.phoneE164}`} class="foot__contact">
+              <Icon name="phone" size={15} />
+              <span>{contact.phoneLabel}</span>
+            </a>
+          </li>
+          <li>
+            <a href={waDefault} target="_blank" rel="noopener" class="foot__contact">
+              <Icon name="whatsapp" size={15} />
+              <span>WhatsApp</span>
+            </a>
+          </li>
+          {
+            contact.email && (
+              <li>
+                <a href={`mailto:${contact.email}`} class="foot__contact">
+                  <Icon name="mail" size={15} />
+                  <span>{contact.email}</span>
+                </a>
+              </li>
+            )
+          }
+          <li class="foot__addr">
+            <Icon name="pin" size={15} />
+            <span>
+              {addr.street}, {addr.complement}<br />
+              {addr.city} — {addr.state}, CEP {addr.zip}
+            </span>
+          </li>
+        </ul>
+      </address>
+    </div>
+
+    <div class="foot__legal" data-reveal="fade">
+      <div class="foot__legalmain">
+        <p class="foot__legalname">{brand.legalName}</p>
+        <p class="foot__cnpj">CNPJ {brand.cnpj}</p>
+        {legal.crc && <p class="foot__cnpj">{legal.crc}</p>}
+      </div>
+      <div class="foot__legalside">
+        <a href={`${base}/politica-de-privacidade`}>Política de privacidade</a>
+        <button type="button" class="foot__motion" data-motion-toggle aria-pressed="false">
+          <Icon name="motion" size={15} />
+          <span data-motion-label>Animações ativas</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="foot__copy" data-reveal="fade">© {year} {brand.legalName}. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    position: relative;
+    padding-block: clamp(3rem, 2rem + 4vw, 5rem) var(--s-6);
+    border-top: 1px solid rgba(194, 203, 212, 0.14);
+  }
+  .foot__top {
+    display: grid;
+    gap: clamp(2rem, 1rem + 3vw, 3.5rem);
+    grid-template-columns: 1fr;
+  }
+  .foot__brand {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+    max-width: 38ch;
+  }
+  .foot__blurb {
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    line-height: 1.6;
+  }
+  .foot__h {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-400);
+    margin-bottom: var(--s-4);
+  }
+  .foot__col ul {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .foot__col a {
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .foot__col a:hover {
+    color: var(--gold-400);
+  }
+  .foot__col li {
+    display: grid;
+    gap: 2px;
+  }
+  .foot__city {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .foot__covers {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+  .foot__col--contact {
+    font-style: normal;
+  }
+  .foot__contact,
+  .foot__addr {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    line-height: 1.5;
+  }
+  .foot__contact :global(svg),
+  .foot__addr :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--gold-400);
+  }
+
+  .foot__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-4) var(--s-6);
+    align-items: center;
+    justify-content: space-between;
+    margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    padding-top: var(--s-5);
+    border-top: 1px solid rgba(194, 203, 212, 0.13);
+  }
+  .foot__legalname {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .foot__cnpj {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+  .foot__legalside {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-4);
+  }
+  .foot__legalside a {
+    font-size: var(--fs-xs);
+    color: var(--fg-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(194, 203, 212, 0.35);
+  }
+  .foot__legalside a:hover {
+    color: var(--gold-400);
+  }
+  .foot__motion {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-soft);
+    border: 1px solid rgba(194, 203, 212, 0.24);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .foot__motion:hover {
+    border-color: var(--gold-400);
+    color: var(--gold-400);
+  }
+  .foot__motion[aria-pressed='true'] :global(svg) {
+    opacity: 0.45;
+  }
+
+  .foot__copy {
+    margin-top: var(--s-5);
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+
+  @media (min-width: 620px) {
+    .foot__top {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 980px) {
+    .foot__top {
+      grid-template-columns: 1.5fr 0.8fr 1fr 1.2fr;
+      gap: var(--s-6);
+    }
+  }
+</style>

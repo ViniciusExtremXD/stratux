@@ -1,0 +1,236 @@
+---
+import Icon from '~/components/Icon.astro';
+import Logo from '~/components/Logo.astro';
+import { brand, contact, waDefault } from '~/data/site';
+---
+
+<section class="hero on-navy navy-field" id="topo">
+  <div class="hero__inner shell shell--wide">
+    <div class="hero__copy" data-hero-out>
+      <p class="kicker hero__motto" data-reveal="fade">
+        {brand.motto.join(' · ')}
+      </p>
+
+      <h1 class="display hero__title" data-split>
+        Contabilidade moderna para pessoas e empresas que querem evoluir.
+      </h1>
+
+      <p class="lead hero__lead" data-reveal style="--i:1">
+        {brand.intro}
+      </p>
+
+      <div class="hero__cta cluster" data-reveal style="--i:2">
+        <a class="btn btn--gold btn--lg magnetic" href={waDefault} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={19} class="btn__ico" />
+          <span>Falar com um contador</span>
+        </a>
+        <a class="btn btn--ghost btn--lg" href="#diagnostico">
+          <span>Fazer o diagnóstico</span>
+          <Icon name="arrowUpRight" size={17} class="btn__ico" />
+        </a>
+      </div>
+
+      <ul class="hero__trust" data-reveal style="--i:3">
+        <li><Icon name="pin" size={15} /><span>São Paulo · Osasco · Jundiaí · Santos</span></li>
+        <li><Icon name="shield" size={15} /><span>CNPJ {brand.cnpj}</span></li>
+        <li><Icon name="clock" size={15} /><span>{contact.responseTime}</span></li>
+      </ul>
+    </div>
+
+    <div class="hero__art" data-reveal="scale" style="--i:1">
+      <div class="hero__artinner" data-parallax="0.06">
+        <Logo variant="lockup" eager class="hero__lockup" />
+
+        <svg class="hero__chart" viewBox="0 0 320 180" aria-hidden="true">
+          <defs>
+            <linearGradient id="hcG" x1="0" y1="180" x2="300" y2="10" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="var(--gold-600)" />
+              <stop offset="1" stop-color="var(--gold-300)" />
+            </linearGradient>
+          </defs>
+          <g class="hero__bars">
+            <rect x="24" y="124" width="26" height="44" rx="2" />
+            <rect x="72" y="104" width="26" height="64" rx="2" />
+            <rect x="120" y="82" width="26" height="86" rx="2" />
+            <rect x="168" y="58" width="26" height="110" rx="2" />
+            <rect x="216" y="34" width="26" height="134" rx="2" />
+          </g>
+          <path class="hero__line" d="M24 140 L85 118 L133 92 L181 66 L262 24" />
+          <path class="hero__head" d="M244 16 L272 14 L266 42 Z" />
+          <line class="hero__axis" x1="12" y1="168" x2="308" y2="168" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <a class="hero__cue" href="#perfil" aria-label="Ir para a próxima seção">
+    <span class="hero__cueline" aria-hidden="true"></span>
+    <Icon name="chevronDown" size={17} />
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(3.5rem, 1.5rem + 9vw, 7.5rem) clamp(5rem, 3rem + 8vw, 8.5rem);
+    margin-top: -68px;
+    padding-top: calc(68px + clamp(2.25rem, 1.2rem + 5vw, 4.5rem));
+    overflow: clip;
+  }
+  .hero__inner {
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 6vw, 4.5rem);
+    align-items: center;
+  }
+  .hero__copy {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+    max-width: 60ch;
+  }
+  .hero__motto {
+    color: var(--gold-400);
+  }
+  .hero__title {
+    max-width: 21ch;
+  }
+  .hero__lead {
+    max-width: 52ch;
+  }
+  .hero__cta {
+    gap: var(--s-4);
+  }
+  .hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+    margin-top: var(--s-2);
+  }
+  .hero__trust li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--fs-sm);
+    color: var(--silver-400);
+  }
+  .hero__trust :global(svg) {
+    flex: none;
+    color: var(--gold-500);
+  }
+
+  /* --- arte --- */
+  .hero__art {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .hero__artinner {
+    position: relative;
+    width: min(100%, 520px);
+    display: grid;
+    gap: clamp(1.25rem, 0.8rem + 1.6vw, 2rem);
+    justify-items: center;
+    padding: clamp(1.75rem, 1rem + 2.6vw, 2.75rem) clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+  .hero__artinner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(201, 162, 39, 0.22);
+    border-radius: var(--r-4);
+    background: radial-gradient(74% 62% at 50% 30%, rgba(46, 80, 116, 0.34), transparent 72%);
+  }
+  .hero :global(.hero__lockup) {
+    position: relative;
+    width: min(94%, 360px);
+    filter: drop-shadow(0 16px 36px rgba(3, 8, 16, 0.5));
+  }
+  .hero__chart {
+    position: relative;
+    width: 100%;
+    height: auto;
+    opacity: 0.92;
+  }
+  .hero__bars rect {
+    fill: rgba(194, 203, 212, 0.16);
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: barRise var(--d-5) var(--e-out) both;
+  }
+  .hero__bars rect:nth-child(1) { animation-delay: 0.35s; }
+  .hero__bars rect:nth-child(2) { animation-delay: 0.45s; }
+  .hero__bars rect:nth-child(3) { animation-delay: 0.55s; }
+  .hero__bars rect:nth-child(4) { animation-delay: 0.65s; }
+  .hero__bars rect:nth-child(5) { animation-delay: 0.75s; }
+  @keyframes barRise {
+    from { transform: scaleY(0); opacity: 0; }
+    to { transform: scaleY(1); opacity: 1; }
+  }
+  .hero__line {
+    fill: none;
+    stroke: url(#hcG);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: drawLine 1.5s var(--e-out) 0.5s both;
+  }
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+  .hero__head {
+    fill: var(--gold-300);
+    opacity: 0;
+    animation: headIn var(--d-4) var(--e-out) 1.55s both;
+  }
+  @keyframes headIn {
+    from { opacity: 0; transform: translate3d(-8px, 8px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .hero__axis {
+    stroke: rgba(194, 203, 212, 0.22);
+    stroke-width: 1;
+  }
+
+  /* --- seta de rolagem --- */
+  .hero__cue {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1rem, 0.5rem + 1.5vw, 2rem);
+    transform: translateX(-50%);
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    color: var(--silver-400);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .hero__cue:hover {
+    color: var(--gold-400);
+  }
+  .hero__cueline {
+    width: 1px;
+    height: 34px;
+    background: linear-gradient(var(--gold-500), transparent);
+    animation: cue 2.6s var(--e-soft) infinite;
+    transform-origin: 50% 0;
+  }
+  @keyframes cue {
+    0%, 100% { transform: scaleY(0.35); opacity: 0.35; }
+    50% { transform: scaleY(1); opacity: 1; }
+  }
+
+  @media (min-width: 900px) {
+    .hero__inner {
+      grid-template-columns: 1.08fr 0.92fr;
+    }
+  }
+  @media (max-width: 899px) {
+    .hero__art {
+      order: -1;
+    }
+    .hero__artinner {
+      width: min(100%, 420px);
+    }
+  }
+</style>

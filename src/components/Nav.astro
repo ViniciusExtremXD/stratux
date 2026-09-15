@@ -1,0 +1,256 @@
+---
+import Logo from '~/components/Logo.astro';
+import Icon from '~/components/Icon.astro';
+import { nav, contact, waDefault } from '~/data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const home = base || '/';
+---
+
+<header class="nav" data-nav>
+  <div class="nav__inner shell shell--wide">
+    <a class="nav__brand" href={home} aria-label="Stratux Consultoria Empresarial — início">
+      <Logo variant="full" size={30} eager />
+    </a>
+
+    <nav class="nav__links" aria-label="Navegação principal">
+      {
+        nav.map((n) => (
+          <a class="nav__link" href={n.href} data-navlink>
+            {n.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="nav__actions">
+      <a class="nav__phone" href={`tel:${contact.phoneE164}`}>
+        <Icon name="phone" size={15} />
+        <span>{contact.phoneLabel}</span>
+      </a>
+      <a class="btn btn--gold nav__cta" href={waDefault} target="_blank" rel="noopener">
+        <Icon name="whatsapp" size={17} class="btn__ico" />
+        <span>Falar agora</span>
+      </a>
+    </div>
+
+    <details class="nav__mobile" data-mobile-menu>
+      <summary aria-label="Abrir menu">
+        <span class="nav__burger" aria-hidden="true"><i></i><i></i><i></i></span>
+      </summary>
+      <div class="nav__sheet">
+        <nav aria-label="Navegação principal (mobile)">
+          {
+            nav.map((n) => (
+              <a class="nav__sheetlink" href={n.href}>
+                <span>{n.label}</span>
+                <Icon name="chevronRight" size={16} />
+              </a>
+            ))
+          }
+        </nav>
+        <div class="nav__sheetfoot">
+          <a class="btn btn--gold btn--block" href={waDefault} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={18} class="btn__ico" />
+            <span>Falar no WhatsApp</span>
+          </a>
+          <a class="nav__sheetphone" href={`tel:${contact.phoneE164}`}>
+            <Icon name="phone" size={16} />
+            <span>{contact.phoneLabel}</span>
+          </a>
+        </div>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    background: transparent;
+    transition:
+      background var(--d-3) var(--e-out),
+      border-color var(--d-3) var(--e-out),
+      transform var(--d-3) var(--e-out),
+      box-shadow var(--d-3) var(--e-out);
+    border-bottom: 1px solid transparent;
+    color: var(--silver-100);
+  }
+  .nav.is-solid {
+    background: color-mix(in srgb, var(--navy-950) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom-color: rgba(194, 203, 212, 0.13);
+    box-shadow: 0 10px 30px rgba(3, 8, 16, 0.28);
+  }
+  .nav.is-hidden {
+    transform: translate3d(0, -104%, 0);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+    min-height: 68px;
+    padding-block: 0.55rem;
+  }
+  .nav__brand {
+    flex: none;
+    border-radius: var(--r-2);
+  }
+
+  .nav__links {
+    display: none;
+    margin-inline: auto;
+    gap: clamp(0.6rem, 0.1rem + 1.1vw, 1.5rem);
+  }
+  .nav__link {
+    position: relative;
+    padding: 0.5rem 0.15rem;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--silver-300);
+    white-space: nowrap;
+    transition: color var(--d-2) var(--e-out);
+  }
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.15rem;
+    height: 1px;
+    background: var(--gold-400);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--d-2) var(--e-out);
+  }
+  .nav__link:hover,
+  .nav__link.is-active {
+    color: var(--silver-100);
+  }
+  .nav__link:hover::after,
+  .nav__link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .nav__actions {
+    display: none;
+    align-items: center;
+    gap: var(--s-4);
+    margin-left: auto;
+  }
+  .nav__phone {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--silver-200);
+    white-space: nowrap;
+    transition: color var(--d-2) var(--e-out);
+  }
+  .nav__phone:hover {
+    color: var(--gold-400);
+  }
+  .nav__cta {
+    white-space: nowrap;
+  }
+
+  /* --- mobile --- */
+  .nav__mobile {
+    margin-left: auto;
+  }
+  .nav__mobile > summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(194, 203, 212, 0.24);
+    border-radius: var(--r-2);
+  }
+  .nav__burger {
+    display: grid;
+    gap: 4px;
+    width: 18px;
+  }
+  .nav__burger i {
+    display: block;
+    height: 1.5px;
+    background: var(--silver-100);
+    border-radius: 2px;
+    transition: transform var(--d-2) var(--e-out), opacity var(--d-2) var(--e-out);
+  }
+  .nav__mobile[open] .nav__burger i:nth-child(1) {
+    transform: translateY(5.5px) rotate(45deg);
+  }
+  .nav__mobile[open] .nav__burger i:nth-child(2) {
+    opacity: 0;
+  }
+  .nav__mobile[open] .nav__burger i:nth-child(3) {
+    transform: translateY(-5.5px) rotate(-45deg);
+  }
+
+  .nav__sheet {
+    position: fixed;
+    inset: 68px 0 auto 0;
+    max-height: calc(100dvh - 68px);
+    overflow-y: auto;
+    padding: var(--s-4) var(--gutter) var(--s-7);
+    background: var(--navy-950);
+    border-top: 1px solid rgba(194, 203, 212, 0.13);
+    display: grid;
+    gap: var(--s-5);
+  }
+  .nav__sheetlink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding: 0.95rem 0.25rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--silver-100);
+    border-bottom: 1px solid rgba(194, 203, 212, 0.11);
+  }
+  .nav__sheetlink :global(svg) {
+    color: var(--gold-400);
+  }
+  .nav__sheetfoot {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: center;
+  }
+  .nav__sheetphone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--silver-300);
+  }
+
+  @media (min-width: 560px) {
+    .nav__phone {
+      display: inline-flex;
+    }
+  }
+  @media (min-width: 620px) {
+    .nav__actions {
+      display: flex;
+    }
+  }
+  @media (min-width: 1040px) {
+    .nav__links {
+      display: flex;
+    }
+    .nav__mobile {
+      display: none;
+    }
+    .nav__actions {
+      margin-left: 0;
+    }
+  }
+</style>

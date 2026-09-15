@@ -1,0 +1,117 @@
+---
+import Icon from '~/components/Icon.astro';
+import { waDefault, contact } from '~/data/site';
+---
+
+<a
+  class="fab"
+  href={waDefault}
+  target="_blank"
+  rel="noopener"
+  aria-label={`Falar com a Stratux no WhatsApp — ${contact.phoneLabel}`}
+>
+  <span class="fab__ring" aria-hidden="true"></span>
+  <Icon name="whatsapp" size={22} class="fab__ico" />
+  <span class="fab__label">Falar no WhatsApp</span>
+</a>
+
+<style>
+  .fab {
+    position: fixed;
+    right: clamp(0.9rem, 0.4rem + 1.4vw, 1.75rem);
+    bottom: clamp(0.9rem, 0.4rem + 1.4vw, 1.75rem);
+    z-index: 70;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    height: 54px;
+    padding: 0 16px;
+    background: var(--navy-900);
+    color: var(--silver-100);
+    border: 1px solid var(--gold-600);
+    border-radius: var(--r-pill);
+    box-shadow: 0 10px 30px rgba(3, 8, 16, 0.4);
+    transition:
+      gap var(--d-3) var(--e-out),
+      padding var(--d-3) var(--e-out),
+      background var(--d-2) var(--e-out),
+      border-color var(--d-2) var(--e-out),
+      transform var(--d-2) var(--e-out),
+      box-shadow var(--d-2) var(--e-out);
+  }
+  .fab :global(.fab__ico) {
+    flex: none;
+    color: var(--gold-400);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .fab__label {
+    display: inline-block;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    opacity: 0;
+    transition:
+      max-width var(--d-3) var(--e-out),
+      opacity var(--d-2) var(--e-out);
+  }
+  .fab__ring {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--gold-500);
+    opacity: 0;
+    animation: fabPulse 3.6s var(--e-soft) infinite;
+    pointer-events: none;
+  }
+  @keyframes fabPulse {
+    0%,
+    72% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    80% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: scale(1.14);
+      opacity: 0;
+    }
+  }
+
+  .fab:hover,
+  .fab:focus-visible {
+    gap: 0.6rem;
+    background: var(--gold-500);
+    border-color: var(--gold-500);
+    color: var(--navy-950);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(3, 8, 16, 0.45);
+  }
+  .fab:hover :global(.fab__ico),
+  .fab:focus-visible :global(.fab__ico) {
+    color: var(--navy-950);
+  }
+  .fab:hover .fab__label,
+  .fab:focus-visible .fab__label {
+    max-width: 12rem;
+    opacity: 1;
+  }
+
+  :global(html.motion-reduced) .fab__ring {
+    animation: none;
+  }
+
+  @media (max-width: 460px) {
+    .fab {
+      height: 50px;
+      padding: 0 14px;
+    }
+  }
+  @media print {
+    .fab {
+      display: none;
+    }
+  }
+</style>

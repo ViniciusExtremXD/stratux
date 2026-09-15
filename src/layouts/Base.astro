@@ -1,0 +1,122 @@
+---
+import { Font } from 'astro:assets';
+import '~/styles/global.css';
+import Nav from '~/components/Nav.astro';
+import Footer from '~/components/Footer.astro';
+import WhatsAppFab from '~/components/WhatsAppFab.astro';
+import { brand, contact, legal, regions, seo } from '~/data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  path?: string;
+  noindex?: boolean;
+  jsonLd?: boolean;
+}
+const {
+  title = seo.title,
+  description = seo.description,
+  path = '/',
+  noindex = false,
+  jsonLd = true,
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site ?? 'https://www.stratuxconsultoria.com.br').href;
+const ogImage = new URL(`${import.meta.env.BASE_URL}og.png`.replace(/\/{2,}/g, '/'), Astro.site ?? 'https://www.stratuxconsultoria.com.br').href;
+const b = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'AccountingService',
+  '@id': `${canonical}#org`,
+  name: brand.full,
+  legalName: brand.legalName,
+  description: seo.description,
+  url: canonical,
+  telephone: contact.phoneE164,
+  taxID: brand.cnpj,
+  image: ogImage,
+  logo: ogImage,
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${legal.address.street}, ${legal.address.complement}`,
+    addressLocality: legal.address.city,
+    addressRegion: legal.address.state,
+    postalCode: legal.address.zip,
+    addressCountry: legal.address.country,
+  },
+  areaServed: regions.map((r) => ({ '@type': 'City', name: r.city })),
+  knowsLanguage: ['pt-BR'],
+  slogan: brand.motto.join(' · '),
+};
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0A1424" />
+    <meta name="author" content={brand.legalName} />
+
+    <link rel="icon" href={`${b}/favicon-32.png`} sizes="32x32" type="image/png" />
+    <link rel="icon" href={`${b}/favicon-192.png`} sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href={`${b}/apple-touch-icon.png`} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={brand.full} />
+    <meta property="og:locale" content={seo.locale} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-sans" preload />
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
+
+    {/* Arranque do movimento: roda antes da pintura, com seguro anti-falha. */}
+    <script is:inline>
+      (function () {
+        var r = document.documentElement;
+        r.classList.add('js');
+        try {
+          if (localStorage.getItem('stratux:motion') === 'reduced') r.classList.add('motion-reduced');
+        } catch (e) {}
+        window.__motionFail = window.setTimeout(function () {
+          if (!r.classList.contains('motion-ready')) r.classList.add('motion-failed');
+        }, 4000);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+    <div class="progress" data-progress aria-hidden="true"></div>
+
+    <Nav />
+
+    <main id="conteudo">
+      <slot />
+    </main>
+
+    <Footer />
+    <WhatsAppFab />
+
+    <script>
+      import '~/scripts/motion';
+    </script>
+  </body>
+</html>

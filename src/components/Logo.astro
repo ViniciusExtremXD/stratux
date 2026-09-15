@@ -1,0 +1,143 @@
+---
+import { Image } from 'astro:assets';
+import mark from '~/assets/logo-mark.png';
+import lockup from '~/assets/logo-lockup.png';
+
+/**
+ * Marca Stratux.
+ * O monograma e o lockup vêm do PNG transparente original do cliente
+ * (single source: src/assets/logo-*.png). O wordmark é composto em texto
+ * quando precisa acompanhar o layout — com o X em dourado, como na marca.
+ *
+ * TODO cliente: solicitar o arquivo vetorial (SVG/AI) para substituir o PNG.
+ */
+interface Props {
+  variant?: 'full' | 'mark' | 'lockup';
+  size?: number;
+  tagline?: boolean;
+  motto?: boolean;
+  class?: string;
+  eager?: boolean;
+  title?: string;
+}
+const {
+  variant = 'full',
+  size = 44,
+  tagline = false,
+  motto = false,
+  class: cls = '',
+  eager = false,
+  title = 'Stratux Consultoria Empresarial',
+} = Astro.props;
+---
+
+{
+  variant === 'lockup' ? (
+    <Image
+      src={lockup}
+      alt={title}
+      widths={[320, 520, 760, 1070]}
+      sizes="(max-width: 700px) 78vw, 520px"
+      formats={['avif', 'webp']}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : undefined}
+      class={`logo-lockup ${cls}`}
+      densities={undefined}
+    />
+  ) : (
+    <span class={`logo logo--${variant} ${cls}`} style={`--mk:${size}px`}>
+      <Image
+        src={mark}
+        alt={variant === 'mark' ? title : ''}
+        width={Math.round(size * 1.152)}
+        height={size}
+        widths={[Math.round(size * 1.152), Math.round(size * 2.3), Math.round(size * 3.46)]}
+        sizes={`${Math.round(size * 1.152)}px`}
+        formats={['avif', 'webp']}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : undefined}
+        class="logo__mark"
+        aria-hidden={variant === 'mark' ? undefined : 'true'}
+      />
+      {variant === 'full' && (
+        <span class="logo__type">
+          <span class="logo__word">
+            STRATU<span class="logo__x">X</span>
+          </span>
+          {tagline && <span class="logo__tag">Consultoria Empresarial</span>}
+          {motto && <span class="logo__motto">Estratégia · Gestão · Resultados</span>}
+        </span>
+      )}
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--mk) * 0.26);
+    line-height: 1;
+  }
+  .logo__mark {
+    flex: none;
+    display: block;
+    width: calc(var(--mk) * 1.152);
+    height: var(--mk);
+    object-fit: contain;
+  }
+  .logo__type {
+    display: grid;
+    gap: calc(var(--mk) * 0.1);
+  }
+  .logo__word {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: calc(var(--mk) * 0.5);
+    letter-spacing: 0.19em;
+    color: var(--silver-100);
+    white-space: nowrap;
+    text-indent: 0.19em;
+  }
+  .logo__x {
+    color: var(--gold-400);
+  }
+  .logo__tag {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: calc(var(--mk) * 0.196);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-400);
+    white-space: nowrap;
+    text-indent: 0.3em;
+  }
+  .logo__motto {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: calc(var(--mk) * 0.168);
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--silver-300);
+    white-space: nowrap;
+    text-indent: 0.26em;
+  }
+
+  .logo-lockup {
+    width: min(78vw, 520px);
+    height: auto;
+    margin-inline: auto;
+  }
+
+  /* Em superfície clara a palavra vira tinta */
+  :global(.on-light) .logo__word {
+    color: var(--ink);
+  }
+  :global(.on-light) .logo__x,
+  :global(.on-light) .logo__tag {
+    color: var(--gold-700);
+  }
+  :global(.on-light) .logo__motto {
+    color: var(--ink-mute);
+  }
+</style>
