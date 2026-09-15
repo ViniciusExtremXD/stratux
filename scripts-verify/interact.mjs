@@ -38,7 +38,7 @@ const browser = await puppeteer.launch({
 });
 const page = await browser.newPage();
 await page.setViewport({ width: 1440, height: 950 });
-await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
+await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
 /* ---------- ids duplicados ---------- */
 const dupes = await page.evaluate(() => {
@@ -173,7 +173,9 @@ form && form.required.length >= 3 && form.consent
 
 // submete vazio: não pode abrir o WhatsApp nem navegar
 let opened = 0;
-browser.on('targetcreated', () => { opened++; });
+// só conta abas/janelas de verdade — iframes (o mapa) também disparam
+// 'targetcreated' no CDP e não devem contar como "abriu o WhatsApp".
+browser.on('targetcreated', (t) => { if (t.type() === 'page') opened++; });
 await page.evaluate(() => {
   const f = document.querySelector('#contato form');
   const b = f.querySelector('[type=submit], button:not([type])');
@@ -203,6 +205,44 @@ red.cls && red.ls === 'reduced' && red.pressed === 'true'
   ? ok('toggle de movimento liga, persiste e anuncia estado')
   : no('toggle de movimento falhou: ' + JSON.stringify(red));
 await page.evaluate(() => document.querySelector('[data-motion-toggle]').click());
+
+/* ---------- mapa de atendimento: troca de praça ---------- */
+const regIds = await page.evaluate(() =>
+  [...document.querySelectorAll('#atendimento input[name=regiao]')].map((r) => r.id),
+);
+if (regIds.length === 4) {
+  ok('mapa: 4 praças encontradas');
+  const before = await page.evaluate(() =>
+    [...document.querySelectorAll('#atendimento .mapa__frame')]
+      .map((f) => ({ id: f.dataset.mapa, visible: getComputedStyle(f).opacity !== '0' })),
+  );
+  const visibleBefore = before.filter((f) => f.visible).map((f) => f.id);
+  visibleBefore.length === 1 && visibleBefore[0] === 'sp'
+    ? ok('mapa: só a matriz (sp) visível antes de qualquer clique')
+    : no('mapa: estado inicial errado: ' + JSON.stringify(before));
+
+  const santosId = regIds.find((i) => /santos$/.test(i));
+  await page.evaluate((id) => document.getElementById(id).click(), santosId);
+  await new Promise((r) => setTimeout(r, 950)); // supera a transição de 0.72s
+  const after = await page.evaluate(() =>
+    [...document.querySelectorAll('#atendimento .mapa__frame')]
+      .map((f) => ({ id: f.dataset.mapa, visible: getComputedStyle(f).opacity !== '0' })),
+  );
+  const visibleAfter = after.filter((f) => f.visible).map((f) => f.id);
+  visibleAfter.length === 1 && visibleAfter[0] === 'santos'
+    ? ok('mapa: clicar em Santos troca para o mapa de Santos, só ele visível')
+    : no('mapa: troca de praça falhou: ' + JSON.stringify(after));
+
+  const iframeSrcOk = await page.evaluate(() =>
+    [...document.querySelectorAll('#atendimento iframe[data-mapa]')].every(
+      (f) => /google\.com\/maps/.test(f.src) && f.src.includes('output=embed'),
+    ),
+  );
+  iframeSrcOk ? ok('mapa: todos os iframes apontam para o Google Maps (embed público)')
+              : no('mapa: algum iframe não aponta para o Google Maps embed');
+} else {
+  no('mapa: esperava 4 praças, achei ' + regIds.length);
+}
 
 /* ---------- links externos ---------- */
 const extBad = await page.evaluate(() =>

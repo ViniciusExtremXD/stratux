@@ -2,7 +2,10 @@
 
 Substitui o Google Sites em `stratuxconsultoria.com.br`. Astro estático, design
 system próprio em CSS puro, motor de movimento sem biblioteca externa, zero
-JavaScript de terceiro.
+script de terceiro no documento principal. A única exceção é o mapa de
+atendimento (`#atendimento`): um `<iframe>` do Google Maps por praça, sem
+chave de API — é conteúdo real do próprio Google, não um script injetado na
+nossa página.
 
 ## Rodar
 
@@ -105,9 +108,26 @@ foi conferida contra cálculo manual em `scripts-verify/calc-test.mjs`.
 A calculadora **não** considera a transição da reforma tributária (EC 132/2023).
 Isso está declarado no aviso exibido ao usuário.
 
+## Mapa de atendimento
+
+`#atendimento` embute um Google Maps por praça (`src/components/RegionsMap.astro`),
+sem chave de API — `https://www.google.com/maps?q=<endereço>&output=embed`.
+Só a matriz (São Paulo) tem endereço completo verificável; Osasco, Jundiaí e
+Santos mostram o pino da cidade até o cliente confirmar o endereço exato de
+cada praça (`regions[].mapQuery` em `site.ts`, `hasAddress: false` nessas três).
+
+O embed gratuito mostra uma pequena barra de busca do próprio Google no canto
+do mapa — não dá para removê-la sem migrar para a Maps Embed API com chave
+(exige projeto no Google Cloud). Ficou como está por decisão do cliente.
+
+Troca de praça é só CSS (radio + `:has()`, mesmo padrão do resto do site) —
+funciona sem JavaScript, mostrando a matriz por padrão.
+
 ## Pendências com o cliente
 
 - Logo em vetor (SVG/AI). Hoje usamos o PNG transparente original.
+- Endereço completo de Osasco, Jundiaí e Santos, para o mapa parar de mostrar
+  só o pino da cidade.
 - Fotos reais da equipe e do escritório.
 - Responsável técnico e registro no CRC-SP (`legal.crc`, `legal.technicalLead`).
 - Depoimentos de clientes com autorização de uso.

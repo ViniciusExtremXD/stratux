@@ -75,8 +75,7 @@ const gates = [{ id: 'todos', label: 'Ver tudo', short: 'Tudo' }, ...profiles];
         <p class="kicker" data-reveal="fade">Serviços</p>
         <h2 class="h2" id="servicos-h" data-split>Tudo o que a sua contabilidade precisa ter.</h2>
         <p class="lead" data-reveal style="--i:1">
-          Seis áreas de atuação, sem terceirizar o que é técnico. Cada item abaixo é um serviço que
-          executamos por dentro — e explicamos em uma linha o que ele resolve.
+          Seis áreas, tudo executado por dentro — nada terceirizado.
         </p>
       </div>
 
@@ -116,19 +115,33 @@ const gates = [{ id: 'todos', label: 'Ver tudo', short: 'Tudo' }, ...profiles];
                 </div>
               </header>
 
-              <ul class="area__items">
+              <ul class="area__tags">
                 {area.items.map((it) => (
-                  <li class="item">
-                    <span class="item__mark" aria-hidden="true">
-                      <Icon name="arrow" size={13} />
-                    </span>
-                    <div>
-                      <span class="item__label">{it.label}</span>
-                      <span class="item__blurb">{it.blurb}</span>
-                    </div>
-                  </li>
+                  <li class="tag">{it.label}</li>
                 ))}
               </ul>
+
+              <details class="area__details">
+                <summary class="area__summarybtn">
+                  <span>Ver o que inclui cada serviço</span>
+                  <span class="area__ind" aria-hidden="true">
+                    <Icon name="plus" size={15} />
+                  </span>
+                </summary>
+                <ul class="area__items">
+                  {area.items.map((it) => (
+                    <li class="item">
+                      <span class="item__mark" aria-hidden="true">
+                        <Icon name="arrow" size={13} />
+                      </span>
+                      <div>
+                        <span class="item__label">{it.label}</span>
+                        <span class="item__blurb">{it.blurb}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </details>
 
               <a
                 class="area__cta"
@@ -380,11 +393,69 @@ const gates = [{ id: 'todos', label: 'Ver tudo', short: 'Tudo' }, ...profiles];
     color: var(--fg-mute);
     line-height: 1.55;
   }
+  /* lista compacta — o que fica sempre visível */
+  .area__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag {
+    padding: 0.32rem 0.7rem;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--fg-soft);
+    line-height: 1.3;
+    background: color-mix(in srgb, var(--fg) 5%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+  }
+
+  /* caixa de expansão — a descrição de cada serviço, sob demanda */
+  .area__details {
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .area__summarybtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .area__ind {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    color: var(--fg-mute);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .area__ind :global(svg) {
+    transition: transform var(--d-3) var(--e-out);
+  }
+  .area__summarybtn:hover .area__ind,
+  .area__details[open] .area__ind {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .area__details[open] .area__ind {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .area__details[open] .area__ind :global(svg) {
+    transform: rotate(135deg);
+  }
   .area__items {
     display: grid;
     gap: var(--s-4);
-    padding-top: var(--s-4);
-    border-top: 1px solid var(--line);
+    margin-top: var(--s-4);
   }
   .item {
     display: flex;

@@ -158,14 +158,18 @@ for (const route of PAGES) {
   for (const [vp, w, h] of [['desktop', 1440, 900], ['mobile', 390, 844]]) {
     const page = await browser.newPage();
     const errors = [];
-    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text().slice(0, 200)); });
+    // só o documento principal — o mapa embute um iframe do Google que tem
+    // console próprio, e Puppeteer relata mensagens de todo frame por padrão.
+    page.on('console', (m) => {
+      if (m.type() === 'error' && m.frame() === page.mainFrame()) errors.push(m.text().slice(0, 200));
+    });
     page.on('pageerror', (e) => errors.push('PAGEERROR ' + String(e).slice(0, 200)));
     page.on('requestfailed', (r) => errors.push('REQFAIL ' + r.url().slice(0, 120)));
 
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
     await page.setViewport({ width: w, height: h, isMobile: vp === 'mobile', hasTouch: vp === 'mobile' });
     const url = ORIGIN + route;
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await new Promise((r) => setTimeout(r, 700));
     await scrollAll(page);
 
@@ -200,7 +204,7 @@ for (const route of PAGES) {
   const nojs = await browser.newPage();
   await nojs.setJavaScriptEnabled(false);
   await nojs.setViewport({ width: 1440, height: 900 });
-  await nojs.goto(ORIGIN + route, { waitUntil: 'networkidle0', timeout: 60000 });
+  await nojs.goto(ORIGIN + route, { waitUntil: 'domcontentloaded', timeout: 60000 });
   const nj = await nojs.evaluate(() => {
     let checked = 0; const hidden = [];
     for (const el of document.querySelectorAll('main *, header *, footer *')) {

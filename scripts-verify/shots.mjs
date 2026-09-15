@@ -42,7 +42,7 @@ const browser = await puppeteer.launch({
 const page = await browser.newPage();
 await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
 await page.setViewport({ width: VP[1], height: VP[2], isMobile: VP[0] === 'mobile', hasTouch: VP[0] === 'mobile' });
-await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'networkidle0', timeout: 60000 });
+await page.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
 // dispara todas as revelações rolando a página inteira, depois volta
 await page.evaluate(async () => {

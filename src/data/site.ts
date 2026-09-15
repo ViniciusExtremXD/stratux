@@ -52,19 +52,45 @@ export const legal = {
 
 export const regions = [
   {
+    id: 'sp',
     city: 'São Paulo',
     role: 'Matriz',
     covers: 'Capital e Zona Leste',
     detail: 'Rua Padre Adelino, 424 — Belenzinho, São Paulo/SP',
+    /** Endereço completo e verificável — vira o pino exato no mapa. */
+    mapQuery: 'Rua Padre Adelino, 424, Belenzinho, São Paulo - SP, 03303-000',
+    hasAddress: true,
   },
-  { city: 'Osasco', role: 'Atendimento', covers: 'Grande SP / Capital', detail: 'Região metropolitana e Oeste da capital' },
   {
+    id: 'osasco',
+    city: 'Osasco',
+    role: 'Atendimento',
+    covers: 'Grande SP / Capital',
+    detail: 'Região metropolitana e Oeste da capital',
+    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
+    mapQuery: 'Osasco, SP',
+    hasAddress: false,
+  },
+  {
+    id: 'jundiai',
     city: 'Jundiaí',
     role: 'Atendimento',
     covers: 'Interior',
     detail: 'Eixo empresarial Anhanguera–Bandeirantes',
+    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
+    mapQuery: 'Jundiaí, SP',
+    hasAddress: false,
   },
-  { city: 'Santos', role: 'Atendimento', covers: 'Litoral', detail: 'Baixada Santista e porto' },
+  {
+    id: 'santos',
+    city: 'Santos',
+    role: 'Atendimento',
+    covers: 'Litoral',
+    detail: 'Baixada Santista e porto',
+    /** TODO cliente: endereço completo desta praça. Por ora, pino da cidade. */
+    mapQuery: 'Santos, SP',
+    hasAddress: false,
+  },
 ] as const;
 
 export const nav = [

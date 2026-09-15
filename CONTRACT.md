@@ -85,6 +85,36 @@ renderiza texto ou imagem precisa estar coberto por alguma animação — no pr�
 elemento ou em um ancestral. O alvo é 100%, zero estáticos. Na prática: marque os
 contêineres com `data-reveal` e os filhos herdam a cobertura.
 
+## Caixas de expansão — o padrão para conteúdo denso
+
+O site prioriza ser **enxuto por padrão, completo sob demanda**. Sempre que uma
+lista tiver mais de ~4 itens com descrição (serviços, calendário, FAQ), o
+padrão é: mostrar uma versão compacta sempre visível (rótulos, números, um
+resumo) e esconder a descrição completa atrás de um `<details>`/`<summary>`
+fechado por padrão. Nunca despeje a lista inteira, expandida, direto na
+página — isso é o que deixa o site "poluído".
+
+Receita, com o mesmo visual em toda parte (veja `ProfileServices.astro` e
+`ObligationsCalendar.astro`):
+
+```astro
+<details class="x__details" data-reveal="fade">
+  <summary class="x__summarybtn">
+    <span>Ver o que inclui / Ver as N datas</span>
+    <span class="x__ind" aria-hidden="true"><Icon name="plus" size={15} /></span>
+  </summary>
+  <!-- conteúdo completo aqui -->
+</details>
+```
+
+CSS do indicador (copie e adapte o prefixo de classe): borda vira `--accent`
+no hover/`[open]`, e o ícone `plus` gira 135deg quando aberto — vire um "×"
+sem trocar de ícone. Funciona sem JavaScript (é `<details>` nativo) e o
+`data-reveal="fade"` no próprio elemento resolve a cobertura de animação.
+
+Isso não é carrossel nem accordion exclusivo: várias caixas podem ficar
+abertas ao mesmo tempo, cada uma no seu ritmo.
+
 ## Falha e acessibilidade — inegociável
 
 - **Nada pode ficar invisível se o JS falhar.** As revelações só escondem sob
@@ -111,6 +141,13 @@ doc, calculator, calendar, clock, chart, coins, search, transfer, alert, info,
 shield, lock, award, spark, bolt, pin, phone, mail, whatsapp, motion, scale,
 globe. **Nunca emoji** — o site antigo usava emoji e é justamente o que estamos
 corrigindo.
+
+Todo ícone é traço fino (stroke), sem preenchimento — **exceto quando a forma
+em si depende de área preenchida para ser legível** (hoje só o `whatsapp`: a
+bolha é traço, mas o fone por dentro é sólido, porque as curvas finas do fone
+em traço puro viram um nó ilegível em 15–22px). Se precisar de um novo ícone
+assim, sobrescreva fill/stroke **no `<path>`**, não no `<svg>` do wrapper — o
+wrapper continua stroke-only para todo o resto por padrão.
 
 ## Dados
 

@@ -63,8 +63,11 @@ const P: Record<string, string> = {
   phone:
     '<path d="M6 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5C10.6 18.5 5.5 13.4 4.5 5.1A1.5 1.5 0 0 1 6 3.5Z"/>',
   mail: '<rect x="3" y="5.5" width="18" height="13" rx="1.6"/><path d="m3.6 6.6 8.4 6 8.4-6"/>',
+  /* Bolha de fala em traço (coerente com o resto do set) com o fone em
+     forma sólida por dentro — não em traço, senão as curvas finas do fone
+     viram um nó ilegível ("o telefone quebrado" que o cliente reportou). */
   whatsapp:
-    '<path d="M3.8 20.2 5.1 16a8.2 8.2 0 1 1 3.1 3l-4.4 1.2Z"/><path d="M9.2 9c-.3 0-.6.1-.8.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.7 2.8 4.3 3.8 2.1.8 2.6.6 3 .6.5 0 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.7-.4-1.7-.8c-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.2-.1-1.1-.4-2-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.2-.5s0-.3-.1-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4Z"/>',
+    '<path d="M12 3.4a8.6 8.6 0 0 0-7.4 13l-1 3.6 3.7-1a8.6 8.6 0 1 0 4.7-15.6Z" fill="none" stroke="currentColor"/><g fill="currentColor" stroke="none" transform="translate(4.6 5.2) scale(0.62)"><path d="M6 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5C10.6 18.5 5.5 13.4 4.5 5.1A1.5 1.5 0 0 1 6 3.5Z"/></g>',
   motion: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/><path d="M12 8v8"/>',
   scale: '<path d="M12 4v16"/><path d="M6 20h12"/><path d="M4 8h16"/><path d="m4 8-2.5 5.5a3 3 0 0 0 5 0L4 8Z"/><path d="m20 8-2.5 5.5a3 3 0 0 0 5 0L20 8Z"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.3 2.4 3.5 5.3 3.5 8.5s-1.2 6.1-3.5 8.5c-2.3-2.4-3.5-5.3-3.5-8.5S9.7 5.9 12 3.5Z"/>',

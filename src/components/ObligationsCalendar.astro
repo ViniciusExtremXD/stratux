@@ -83,8 +83,7 @@ const ctaHref = wa(
           As datas que a sua rotina fiscal é obrigada a cumprir.
         </h2>
         <p class="lead" data-reveal style="--i:1">
-          O que vence todo mês e o que vence uma vez por ano, com quem é atingido por cada prazo.
-          Filtre pelo seu perfil e veja só o que obriga você.
+          O próximo vencimento, sempre à vista. O calendário completo, quando você quiser abrir.
         </p>
         <p class="obg__meta" data-reveal style="--i:2">
           <span>
@@ -146,46 +145,54 @@ const ctaHref = wa(
             </span>
             <div>
               <h3 class="h3">Todo mês</h3>
-              <p class="cal__sub">
-                O dia é a referência de vencimento. A regra de cada tributo ajusta quando ele cai em
-                fim de semana ou feriado.
-              </p>
+              <p class="cal__sub">O dia é a referência — a regra de cada tributo ajusta o vencimento em fim de semana ou feriado.</p>
             </div>
           </div>
 
-          <ul class="cal__body">
-            {
-              gruposMensais.map((g, i) => (
-                <li class="dayrow" data-reveal style={`--i:${Math.min(i, 4)}`}>
-                  <p class="dayrow__day">
-                    <span class="dayrow__num num">{pad(g.day)}</span>
-                    <span class="dayrow__word">dia</span>
-                  </p>
+          <details class="cal__details" data-reveal="fade">
+            <summary class="cal__summarybtn">
+              <span>
+                Ver as <span class="num" data-count={monthlyObligations.length}>{monthlyObligations.length}</span> datas mensais
+              </span>
+              <span class="cal__ind" aria-hidden="true">
+                <Icon name="plus" size={15} />
+              </span>
+            </summary>
 
-                  <ul class="dayrow__items">
-                    {g.items.map((o) => (
-                      <li class="ob" data-ob data-day={o.day} data-profiles={o.profiles.join(' ')}>
-                        <p class="ob__head">
-                          <span class="ob__name" data-ob-name>
-                            {o.name}
-                          </span>
-                          <span class="ob__who" data-ob-who>
-                            {o.who}
-                          </span>
-                        </p>
-                        <p class="ob__note">{o.note}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))
-            }
-          </ul>
+            <ul class="cal__body">
+              {
+                gruposMensais.map((g, i) => (
+                  <li class="dayrow" data-reveal style={`--i:${Math.min(i, 4)}`}>
+                    <p class="dayrow__day">
+                      <span class="dayrow__num num">{pad(g.day)}</span>
+                      <span class="dayrow__word">dia</span>
+                    </p>
 
-          <p class="cal__empty" role="status">
-            Nenhuma obrigação mensal para esse perfil.
-            <label for="obg-todos">Ver o calendário inteiro</label>.
-          </p>
+                    <ul class="dayrow__items">
+                      {g.items.map((o) => (
+                        <li class="ob" data-ob data-day={o.day} data-profiles={o.profiles.join(' ')}>
+                          <p class="ob__head">
+                            <span class="ob__name" data-ob-name>
+                              {o.name}
+                            </span>
+                            <span class="ob__who" data-ob-who>
+                              {o.who}
+                            </span>
+                          </p>
+                          <p class="ob__note">{o.note}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <p class="cal__empty" role="status">
+              Nenhuma obrigação mensal para esse perfil.
+              <label for="obg-todos">Ver o calendário inteiro</label>.
+            </p>
+          </details>
         </div>
 
         <!-- anuais -->
@@ -196,41 +203,50 @@ const ctaHref = wa(
             </span>
             <div>
               <h3 class="h3">Uma vez por ano</h3>
-              <p class="cal__sub">
-                As entregas anuais, na ordem em que chegam ao longo do ano-calendário.
-              </p>
+              <p class="cal__sub">As entregas anuais, na ordem em que chegam.</p>
             </div>
           </div>
 
-          <ul class="cal__body">
-            {
-              anuais.map((o, i) => (
-                <li
-                  class="ann"
-                  data-profiles={o.profiles.join(' ')}
-                  data-reveal
-                  style={`--i:${Math.min(i, 4)}`}
-                >
-                  <p class="ann__date">
-                    <span class="ann__num num">{pad(o.day)}</span>
-                    <span class="ann__mon">{MESES_ABREV[(o.month ?? 1) - 1]}</span>
-                  </p>
-                  <div class="ann__body">
-                    <p class="ob__head">
-                      <span class="ob__name">{o.name}</span>
-                      <span class="ob__who">{o.who}</span>
-                    </p>
-                    <p class="ob__note">{o.note}</p>
-                  </div>
-                </li>
-              ))
-            }
-          </ul>
+          <details class="cal__details" data-reveal="fade">
+            <summary class="cal__summarybtn">
+              <span>
+                Ver as <span class="num" data-count={annualObligations.length}>{annualObligations.length}</span> entregas anuais
+              </span>
+              <span class="cal__ind" aria-hidden="true">
+                <Icon name="plus" size={15} />
+              </span>
+            </summary>
 
-          <p class="cal__empty" role="status">
-            Nenhuma obrigação anual para esse perfil.
-            <label for="obg-todos">Ver o calendário inteiro</label>.
-          </p>
+            <ul class="cal__body">
+              {
+                anuais.map((o, i) => (
+                  <li
+                    class="ann"
+                    data-profiles={o.profiles.join(' ')}
+                    data-reveal
+                    style={`--i:${Math.min(i, 4)}`}
+                  >
+                    <p class="ann__date">
+                      <span class="ann__num num">{pad(o.day)}</span>
+                      <span class="ann__mon">{MESES_ABREV[(o.month ?? 1) - 1]}</span>
+                    </p>
+                    <div class="ann__body">
+                      <p class="ob__head">
+                        <span class="ob__name">{o.name}</span>
+                        <span class="ob__who">{o.who}</span>
+                      </p>
+                      <p class="ob__note">{o.note}</p>
+                    </div>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <p class="cal__empty" role="status">
+              Nenhuma obrigação anual para esse perfil.
+              <label for="obg-todos">Ver o calendário inteiro</label>.
+            </p>
+          </details>
         </div>
       </div>
 
@@ -651,8 +667,52 @@ const ctaHref = wa(
     line-height: 1.55;
     color: var(--fg-mute);
   }
+
+  /* caixa de expansão — o calendário completo, sob demanda */
+  .cal__details {
+    margin-top: var(--s-4);
+  }
+  .cal__summarybtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding-block: var(--s-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .cal__ind {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    color: var(--fg-mute);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .cal__ind :global(svg) {
+    transition: transform var(--d-3) var(--e-out);
+  }
+  .cal__summarybtn:hover .cal__ind,
+  .cal__details[open] .cal__ind {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .cal__details[open] .cal__ind {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .cal__details[open] .cal__ind :global(svg) {
+    transform: rotate(135deg);
+  }
   .cal__body {
     display: grid;
+    margin-top: var(--s-3);
   }
 
   /* ---------- linha de dia (mensais) ---------- */
