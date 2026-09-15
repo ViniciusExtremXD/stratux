@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "verify": "node scripts-verify/verify.mjs",
+    "verify:all": "node scripts-verify/verify.mjs --pages /,/politica-de-privacidade,/404"
   },
   "dependencies": {
     "astro": "^5.18.2",
