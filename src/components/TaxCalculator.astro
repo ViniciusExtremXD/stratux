@@ -1,0 +1,942 @@
+---
+import Icon from '~/components/Icon.astro';
+import { disclaimerText, taxRef, wa } from '~/data/site';
+
+/**
+ * Comparativo Simples Nacional × Lucro Presumido.
+ *
+ * Sem JavaScript: os campos aparecem com os valores padrão e o painel de
+ * resultado explica que a conta precisa de JS, com o caminho do WhatsApp.
+ * Com JavaScript: o painel troca para o resultado vivo e recalcula a cada
+ * mudança. Toda a matemática vive no script de cliente abaixo, em cima das
+ * tabelas de `~/data/site` — nada de número escrito à mão aqui.
+ */
+
+const waSemCalculo = wa(
+  'Olá! Vim pela calculadora do site da Stratux e quero comparar Simples Nacional e Lucro Presumido para a minha empresa.',
+);
+
+const tetoSimples = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+}).format(taxRef.simplesLimit);
+---
+
+<section class="calc section" id="calculadora" aria-labelledby="calculadora-h" data-calc>
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Comparativo de regimes</p>
+      <h2 class="h2" id="calculadora-h" data-split>Simples Nacional ou Lucro Presumido?</h2>
+      <p class="lead" data-reveal style="--i:1">
+        Informe quatro números e veja a ordem de grandeza de cada regime, com a conta aberta linha
+        a linha. É uma estimativa para orientar a conversa — a apuração real depende do seu CNAE,
+        do estado e do município.
+      </p>
+    </div>
+
+    <div class="sheet">
+      <!-- ------------------------------ ENTRADAS ------------------------------ -->
+      <div class="inputs" data-reveal="left">
+        <fieldset class="inputs__fs">
+          <legend class="inputs__legend h4">
+            <span class="icobox"><Icon name="calculator" size={21} /></span>
+            <span>Seus números</span>
+          </legend>
+
+          <div class="inputs__body">
+            <div class="field">
+              <label for="calc-faturamento">Faturamento mensal (R$)</label>
+              <input
+                class="input"
+                id="calc-faturamento"
+                name="faturamento"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="100"
+                value="30000"
+                autocomplete="off"
+                aria-describedby="calc-faturamento-hint"
+              />
+              <p class="hint" id="calc-faturamento-hint">
+                Receita bruta de um mês típico. Usamos ela vezes doze como RBT12 — a receita dos
+                últimos doze meses que define a faixa do Simples.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="calc-atividade">Atividade</label>
+              <select class="select" id="calc-atividade" name="atividade" autocomplete="off">
+                <option value="servicos" selected>Serviços</option>
+                <option value="comercio">Comércio</option>
+                <option value="industria">Indústria</option>
+              </select>
+              <p class="hint">
+                Define o anexo do Simples e o percentual de presunção do Lucro Presumido.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="calc-folha">Folha de pagamento mensal, incluindo pró-labore (R$)</label>
+              <input
+                class="input"
+                id="calc-folha"
+                name="folha"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="100"
+                value="0"
+                autocomplete="off"
+                aria-describedby="calc-folha-hint"
+              />
+              <p class="hint" id="calc-folha-hint">
+                Este campo mexe nos dois lados da conta. No Simples, ele decide o fator R e, com ele,
+                se serviços caem no Anexo III ou no Anexo V. No Lucro Presumido, ele gera a CPP —
+                a contribuição patronal sobre a folha, que no Simples já vem dentro do DAS.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="calc-iss">ISS do município (%)</label>
+              <input
+                class="input"
+                id="calc-iss"
+                name="iss"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                max="5"
+                step="0.5"
+                value="5"
+                autocomplete="off"
+                aria-describedby="calc-iss-hint"
+              />
+              <p class="hint" id="calc-iss-hint">
+                A alíquota que a sua cidade cobra sobre o serviço — a lei complementar limita o ISS
+                a 5%. Ele só entra na conta do Lucro Presumido e só para serviços: no Simples
+                Nacional o ISS já está embutido no DAS.
+                <span class="iss-na">
+                  A atividade selecionada agora não recolhe ISS, então este campo não altera o
+                  resultado.
+                </span>
+              </p>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- ------------------------------ RESULTADO ------------------------------ -->
+      <div class="result" data-reveal="right" style="--i:1">
+        <div class="result__head">
+          <h3 class="h4 result__title">Resultado estimado</h3>
+          <p class="result__ref">Anexos da LC 123/2006 · referência {taxRef.year}</p>
+        </div>
+
+        {/* Sem JavaScript: mensagem clara + caminho humano. */}
+        <div class="nojs" data-nojs>
+          <span class="icobox"><Icon name="info" size={21} /></span>
+          <p class="nojs__text">
+            O comparativo é calculado no seu navegador e precisa de JavaScript ativo. Os campos ao
+            lado já estão preenchidos com os valores padrão, mas o resultado não aparece sem ele.
+            Se preferir, mande os seus números no WhatsApp que fazemos a conta e explicamos o
+            enquadramento.
+          </p>
+          <a class="btn btn--gold btn--block" href={waSemCalculo} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={18} class="btn__ico" />
+            <span>Pedir o comparativo pelo WhatsApp</span>
+          </a>
+        </div>
+
+        {/* Com JavaScript: o painel vivo. */}
+        <div class="live" data-live hidden>
+          <p class="empty" data-empty hidden>
+            Informe um faturamento mensal maior que zero para ver o comparativo.
+          </p>
+
+          <div class="cards" data-cards>
+            <!-- Simples Nacional -->
+            <article class="rcard" aria-labelledby="calc-simples-h">
+              <header class="rcard__head">
+                <p class="rcard__kicker">Regime</p>
+                <h4 class="h3 rcard__name" id="calc-simples-h">Simples Nacional</h4>
+              </header>
+
+              <div class="rcard__figure" data-simples-figure>
+                <p class="rcard__money num" data-v="s-total">—</p>
+                <p class="rcard__per">por mês, em guia única (DAS)</p>
+                <p class="rcard__rate">
+                  Alíquota efetiva de <b class="num" data-v="s-rate">—</b> sobre o faturamento
+                </p>
+              </div>
+
+              <div class="over" data-simples-over hidden>
+                <span class="over__ico"><Icon name="alert" size={18} /></span>
+                <p>
+                  Com esse faturamento a empresa fica <b>acima do teto do Simples Nacional</b>
+                  de {tetoSimples} por ano. O regime não se aplica e o comparativo perde o sentido:
+                  a escolha real passa a ser entre Lucro Presumido e Lucro Real.
+                </p>
+              </div>
+
+              <dl class="rows" data-simples-rows>
+                <div class="row">
+                  <dt>Receita dos últimos 12 meses (RBT12)</dt>
+                  <dd class="num" data-v="s-rbt12">—</dd>
+                </div>
+                <div class="row">
+                  <dt>Anexo aplicado</dt>
+                  <dd data-v="s-anexo">—</dd>
+                </div>
+                <div class="row">
+                  <dt>Alíquota nominal da faixa</dt>
+                  <dd class="num" data-v="s-nominal">—</dd>
+                </div>
+                <div class="row">
+                  <dt>Parcela a deduzir da faixa</dt>
+                  <dd class="num" data-v="s-deduz">—</dd>
+                </div>
+                <div class="row row--total">
+                  <dt>DAS mensal</dt>
+                  <dd class="num" data-v="s-total-row">—</dd>
+                </div>
+              </dl>
+
+              <p class="rcard__note">
+                O DAS é guia única: já inclui IRPJ, CSLL, PIS, COFINS, CPP — a contribuição
+                patronal sobre a folha — e mais o ISS, no caso de serviços, ou o ICMS, no caso de
+                comércio e indústria.
+              </p>
+            </article>
+
+            <!-- Lucro Presumido -->
+            <article class="rcard" aria-labelledby="calc-presumido-h">
+              <header class="rcard__head">
+                <p class="rcard__kicker">Regime</p>
+                <h4 class="h3 rcard__name" id="calc-presumido-h">Lucro Presumido</h4>
+              </header>
+
+              <div class="rcard__figure">
+                <p class="rcard__money num" data-v="p-total">—</p>
+                <p class="rcard__per">por mês, somando as guias</p>
+                <p class="rcard__rate">
+                  Alíquota efetiva de <b class="num" data-v="p-rate">—</b> sobre o faturamento
+                </p>
+              </div>
+
+              <dl class="rows">
+                <div class="row">
+                  <dt>
+                    IRPJ
+                    <span class="row__meta">
+                      15% sobre <span data-v="p-base-irpj">—</span> do faturamento
+                    </span>
+                  </dt>
+                  <dd class="num" data-v="p-irpj">—</dd>
+                </div>
+                <div class="row">
+                  <dt>
+                    Adicional de IRPJ
+                    <span class="row__meta" data-v="p-adic-meta">—</span>
+                  </dt>
+                  <dd class="num" data-v="p-adic">—</dd>
+                </div>
+                <div class="row">
+                  <dt>
+                    CSLL
+                    <span class="row__meta">
+                      9% sobre <span data-v="p-base-csll">—</span> do faturamento
+                    </span>
+                  </dt>
+                  <dd class="num" data-v="p-csll">—</dd>
+                </div>
+                <div class="row">
+                  <dt>PIS <span class="row__meta">0,65% do faturamento</span></dt>
+                  <dd class="num" data-v="p-pis">—</dd>
+                </div>
+                <div class="row">
+                  <dt>COFINS <span class="row__meta">3% do faturamento</span></dt>
+                  <dd class="num" data-v="p-cofins">—</dd>
+                </div>
+                <div class="row">
+                  <dt>ISS <span class="row__meta" data-v="p-iss-meta">—</span></dt>
+                  <dd class="num" data-v="p-iss">—</dd>
+                </div>
+                <div class="row">
+                  <dt>
+                    CPP sobre a folha
+                    <span class="row__meta">27,8% — INSS patronal, RAT médio e terceiros</span>
+                  </dt>
+                  <dd class="num" data-v="p-cpp">—</dd>
+                </div>
+                <div class="row row--icms" data-row-icms hidden>
+                  <dt>ICMS <span class="row__meta">varia por estado e por produto</span></dt>
+                  <dd class="row__out">Fora desta conta</dd>
+                </div>
+                <div class="row row--total">
+                  <dt>Total mensal</dt>
+                  <dd class="num" data-v="p-total-row">—</dd>
+                </div>
+              </dl>
+
+              <p class="rcard__note" data-icms-note hidden>
+                O ICMS não está somado acima. Ele depende do estado, do produto e da substituição
+                tributária, então incluí-lo por estimativa deixaria a comparação enganosa — no
+                Simples Nacional, por outro lado, ele já está dentro do DAS.
+              </p>
+            </article>
+          </div>
+
+          <!-- Fator R (serviços) -->
+          <div class="fator" data-fator hidden>
+            <span class="fator__ico"><Icon name="scale" size={18} /></span>
+            <div>
+              <p class="fator__line">
+                Fator R apurado: <b class="num gold" data-v="fr-value">—</b> — o que leva a
+                atividade para o <b data-v="fr-anexo">—</b>.
+              </p>
+              <p class="fator__note">
+                O fator R é a razão entre a folha dos últimos doze meses e o RBT12. A partir de 28%
+                os serviços migram do Anexo V para o Anexo III, que costuma ser mais leve. Para
+                chegar à massa salarial anual usamos a folha informada × 12 × 1,2 — o multiplicador
+                aproxima 13º, férias e encargos, que também compõem a base do fator R.
+                <span data-v="fr-folha"></span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Veredito -->
+          <div class="verdict" data-verdict aria-live="polite" aria-atomic="true">
+            <p class="verdict__label">Diferença anual estimada</p>
+            <p class="verdict__money num" data-v="v-money">—</p>
+            <p class="verdict__text" data-v="v-text">—</p>
+          </div>
+
+          <div class="verdict verdict--na" data-verdict-na hidden aria-live="polite">
+            <p class="verdict__label">Sem comparativo</p>
+            <p class="verdict__text">
+              Acima do teto do Simples Nacional não há dois regimes para comparar. O que ficou
+              acima é só a estimativa do Lucro Presumido — vale avaliar também o Lucro Real, e essa
+              conta depende das suas despesas reais.
+            </p>
+          </div>
+
+          <a class="btn btn--gold btn--block" data-wa href={waSemCalculo} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={18} class="btn__ico" />
+            <span>Conferir este resultado com um contador</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot" data-reveal="fade">
+      <p class="foot__icms">
+        <Icon name="info" size={16} />
+        <span>
+          Leitura importante: para comércio e indústria, o ICMS <b>não entra</b> no total do Lucro
+          Presumido calculado aqui — ele muda por estado, por produto e por substituição
+          tributária. No Simples Nacional o ICMS já está dentro do DAS. Comparar os dois totais sem
+          saber disso levaria a uma conclusão errada.
+        </span>
+      </p>
+
+      <p class="disclaimer">
+        <Icon name="alert" size={16} />
+        <span>{disclaimerText}</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { presumido, simplesTables, taxRef, wa } from '~/data/site';
+
+  type Atividade = 'servicos' | 'comercio' | 'industria';
+  type Anexo = 'I' | 'II' | 'III' | 'V';
+
+  const root = document.querySelector<HTMLElement>('[data-calc]');
+
+  if (root) {
+    const fFaturamento = root.querySelector<HTMLInputElement>('#calc-faturamento');
+    const fAtividade = root.querySelector<HTMLSelectElement>('#calc-atividade');
+    const fFolha = root.querySelector<HTMLInputElement>('#calc-folha');
+    const fIss = root.querySelector<HTMLInputElement>('#calc-iss');
+    const live = root.querySelector<HTMLElement>('[data-live]');
+    const nojs = root.querySelector<HTMLElement>('[data-nojs]');
+    const link = root.querySelector<HTMLAnchorElement>('[data-wa]');
+
+    const brl = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+    const dec2 = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const money = (v: number) => brl.format(Math.round(v));
+    const pct = (v: number) => `${dec2.format(v * 100)}%`;
+
+    const ATIVIDADE: Record<Atividade, string> = {
+      servicos: 'Serviços',
+      comercio: 'Comércio',
+      industria: 'Indústria',
+    };
+
+    /* saídas endereçadas por data-v */
+    const slots = new Map<string, HTMLElement>();
+    root.querySelectorAll<HTMLElement>('[data-v]').forEach((el) => {
+      const key = el.dataset.v;
+      if (key) slots.set(key, el);
+    });
+    const put = (key: string, text: string) => {
+      const el = slots.get(key);
+      if (el) el.textContent = text;
+    };
+    const toggle = (selector: string, on: boolean) => {
+      const el = root.querySelector<HTMLElement>(selector);
+      if (el) el.hidden = !on;
+    };
+
+    /** Lê o campo respeitando os limites declarados no próprio HTML. */
+    const readNumber = (el: HTMLInputElement | null, fallback: number): number => {
+      if (!el) return fallback;
+      const raw = el.value.trim().replace(',', '.');
+      if (raw === '') return 0;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return fallback;
+      const max = el.max === '' ? Number.NaN : Number(el.max);
+      const clamped = Math.max(0, n);
+      return Number.isFinite(max) ? Math.min(clamped, max) : clamped;
+    };
+
+    function render(): void {
+      const faturamento = readNumber(fFaturamento, 0);
+      const folha = readNumber(fFolha, 0);
+      const issPercent = readNumber(fIss, 0);
+      const escolha = fAtividade ? fAtividade.value : '';
+      const atividade: Atividade =
+        escolha === 'comercio' || escolha === 'industria' ? escolha : 'servicos';
+      const servicos = atividade === 'servicos';
+
+      /* ---------------- Simples Nacional ---------------- */
+      const rbt12 = faturamento * 12;
+
+      // O multiplicador 1,2 aproxima 13º, férias e encargos que compõem a
+      // massa salarial considerada no fator R.
+      const folhaAnual = folha * 12 * 1.2;
+      const fatorR = rbt12 > 0 ? folhaAnual / rbt12 : 0;
+
+      let anexo: Anexo;
+      if (atividade === 'comercio') anexo = 'I';
+      else if (atividade === 'industria') anexo = 'II';
+      else anexo = fatorR >= 0.28 ? 'III' : 'V';
+
+      const acimaDoTeto = rbt12 > taxRef.simplesLimit;
+      const banda = acimaDoTeto
+        ? undefined
+        : simplesTables[anexo].find((b) => b.upTo >= rbt12);
+
+      /* A alíquota efetiva fica com todas as casas — é ela que descreve a faixa.
+         O DAS, que é dinheiro na tela, é arredondado uma vez só: assim o valor
+         exibido e o usado no veredito são exatamente o mesmo número. */
+      let aliquotaEfetiva = 0;
+      let dasMensal = 0;
+      if (banda && rbt12 > 0) {
+        aliquotaEfetiva = (rbt12 * banda.rate - banda.deduct) / rbt12;
+        dasMensal = Math.round(faturamento * aliquotaEfetiva);
+      }
+
+      /* ---------------- Lucro Presumido ----------------
+         Cada guia é arredondada uma única vez e o total é a soma das guias já
+         arredondadas. Somar os valores cheios e arredondar só no fim fazia o
+         "Total mensal" divergir em alguns reais da soma das linhas mostradas —
+         quem conferisse a conta na mão encontraria um erro que não existe. */
+      const base = servicos ? presumido.presuncao.servicos : presumido.presuncao.comercio;
+      const lucroPresumidoIRPJ = faturamento * base.irpj;
+      const lucroPresumidoCSLL = faturamento * base.csll;
+      const irpj = Math.round(lucroPresumidoIRPJ * presumido.irpj);
+      const adicional = Math.round(
+        Math.max(0, lucroPresumidoIRPJ - presumido.irpjAdicionalLimiteMensal) *
+          presumido.irpjAdicional,
+      );
+      const csll = Math.round(lucroPresumidoCSLL * presumido.csll);
+      const pis = Math.round(faturamento * presumido.pis);
+      const cofins = Math.round(faturamento * presumido.cofins);
+      const iss = servicos ? Math.round(faturamento * (issPercent / 100)) : 0;
+      const cpp = Math.round(folha * presumido.cppFolha);
+      const totalPresumido = irpj + adicional + csll + pis + cofins + iss + cpp;
+      const efetivaPresumido = faturamento > 0 ? totalPresumido / faturamento : 0;
+
+      /* ---------------- estados do painel ---------------- */
+      const vazio = faturamento <= 0;
+      toggle('[data-empty]', vazio);
+      toggle('[data-cards]', !vazio);
+      toggle('[data-fator]', !vazio && servicos && !acimaDoTeto);
+      toggle('[data-verdict]', !vazio && !acimaDoTeto);
+      toggle('[data-verdict-na]', !vazio && acimaDoTeto);
+      toggle('[data-simples-figure]', !acimaDoTeto);
+      toggle('[data-simples-rows]', !acimaDoTeto);
+      toggle('[data-simples-over]', acimaDoTeto);
+      toggle('[data-row-icms]', !servicos);
+      toggle('[data-icms-note]', !servicos);
+
+      /* ---------------- Simples: linhas ---------------- */
+      put('s-total', money(dasMensal));
+      put('s-total-row', money(dasMensal));
+      put('s-rate', pct(aliquotaEfetiva));
+      put('s-rbt12', money(rbt12));
+      put('s-anexo', `Anexo ${anexo}`);
+      put('s-nominal', banda ? pct(banda.rate) : '—');
+      put('s-deduz', banda ? money(banda.deduct) : '—');
+
+      /* ---------------- Presumido: linhas ---------------- */
+      put('p-total', money(totalPresumido));
+      put('p-total-row', money(totalPresumido));
+      put('p-rate', pct(efetivaPresumido));
+      put('p-base-irpj', pct(base.irpj));
+      put('p-base-csll', pct(base.csll));
+      put('p-irpj', money(irpj));
+      put('p-adic', money(adicional));
+      put(
+        'p-adic-meta',
+        `10% sobre o que passar de ${money(presumido.irpjAdicionalLimiteMensal)} de lucro presumido no mês — hoje o seu lucro presumido é de ${money(lucroPresumidoIRPJ)}`,
+      );
+      put('p-csll', money(csll));
+      put('p-pis', money(pis));
+      put('p-cofins', money(cofins));
+      put('p-iss', servicos ? money(iss) : 'Não se aplica');
+      put(
+        'p-iss-meta',
+        servicos
+          ? `${dec2.format(issPercent)}% do faturamento, conforme o município`
+          : 'o ISS incide sobre serviços',
+      );
+      put('p-cpp', money(cpp));
+
+      /* ---------------- fator R ---------------- */
+      put('fr-value', pct(fatorR));
+      put('fr-anexo', `Anexo ${anexo}`);
+      put(
+        'fr-folha',
+        `Com a folha informada, isso dá ${money(folhaAnual)} de massa salarial no ano contra ${money(rbt12)} de receita.`,
+      );
+
+      /* ---------------- veredito ---------------- */
+      const diferencaMensal = totalPresumido - dasMensal;
+      const diferencaAnual = Math.abs(diferencaMensal) * 12;
+      const maisBarato = diferencaMensal > 0 ? 'Simples Nacional' : 'Lucro Presumido';
+      const empate = diferencaAnual < 1;
+
+      put('v-money', empate ? money(0) : money(diferencaAnual));
+      put(
+        'v-text',
+        empate
+          ? 'Com estes números os dois regimes ficam praticamente empatados. A decisão passa a depender de fatores que esta conta não vê.'
+          : `Diferença estimada de ${money(diferencaAnual)} por ano a favor do ${maisBarato}, mantidos os valores informados ao longo de doze meses.`,
+      );
+
+      /* ---------------- WhatsApp com contexto ---------------- */
+      if (link) {
+        const atividadeLabel = ATIVIDADE[atividade];
+        let msg: string;
+        if (vazio) {
+          msg =
+            'Olá! Vim pela calculadora do site da Stratux e quero comparar Simples Nacional e Lucro Presumido para a minha empresa.';
+        } else if (acimaDoTeto) {
+          msg = `Olá! Usei a calculadora do site da Stratux. Faturamento mensal de ${money(faturamento)}, atividade: ${atividadeLabel}, folha de ${money(folha)}. O faturamento fica acima do teto do Simples Nacional e o Lucro Presumido estimado deu ${money(totalPresumido)} por mês. Gostaria de uma análise do meu caso.`;
+        } else {
+          msg = `Olá! Usei a calculadora do site da Stratux. Faturamento mensal de ${money(faturamento)}, atividade: ${atividadeLabel}, folha de ${money(folha)}. Simples Nacional (Anexo ${anexo}): ${money(dasMensal)} por mês. Lucro Presumido: ${money(totalPresumido)} por mês. ${
+            empate
+              ? 'Os dois ficaram praticamente empatados.'
+              : `Diferença estimada de ${money(diferencaAnual)} por ano a favor do ${maisBarato}.`
+          } Gostaria de uma análise do meu caso.`;
+        }
+        link.href = wa(msg);
+      }
+
+      /* ---------------- troca contida dos valores ---------------- */
+      if (live) {
+        live.classList.remove('is-fresh');
+        void live.offsetWidth;
+        live.classList.add('is-fresh');
+      }
+    }
+
+    /* o painel vivo assume o lugar da mensagem de fallback */
+    if (live) live.hidden = false;
+    if (nojs) nojs.hidden = true;
+
+    let timer = 0;
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(render, 120);
+    };
+
+    [fFaturamento, fAtividade, fFolha, fIss].forEach((el) => {
+      if (!el) return;
+      el.addEventListener('input', schedule);
+      el.addEventListener('change', schedule);
+    });
+
+    render();
+  }
+</script>
+
+<style>
+  /* ---------- folha ---------- */
+  .sheet {
+    display: grid;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-4);
+    box-shadow: var(--sh-2);
+    overflow: hidden;
+  }
+
+  /* ---------- entradas ---------- */
+  .inputs {
+    padding: clamp(1.4rem, 1rem + 1.6vw, 2.25rem);
+    background: var(--bg-raised);
+  }
+  .inputs__fs {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  .inputs__legend {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    width: 100%;
+    padding: 0;
+    margin-bottom: var(--s-5);
+  }
+  .inputs__body {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .iss-na {
+    display: none;
+    font-weight: 600;
+    color: var(--fg-soft);
+  }
+  .sheet:has(#calc-atividade option:not([value='servicos']):checked) .iss-na {
+    display: inline;
+  }
+
+  /* ---------- painel de resultado ---------- */
+  .result {
+    display: grid;
+    align-content: start;
+    gap: var(--s-5);
+    padding: clamp(1.4rem, 1rem + 1.6vw, 2.25rem);
+    background: var(--bone-dim);
+    border-top: 1px solid var(--line);
+  }
+  .result__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-2) var(--s-4);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .result__ref {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+    letter-spacing: 0.02em;
+  }
+
+  /* sem JavaScript */
+  .nojs {
+    display: grid;
+    gap: var(--s-4);
+    padding: clamp(1.1rem, 0.85rem + 1vw, 1.6rem);
+    background: var(--bg-raised);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-3);
+  }
+  .nojs__text {
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    line-height: 1.6;
+  }
+
+  /* painel vivo */
+  .live {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .empty {
+    padding: var(--s-5);
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    background: var(--bg-raised);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-3);
+  }
+
+  /* troca contida de valores — opacidade apenas */
+  .live.is-fresh [data-v] {
+    animation: valIn var(--d-2) var(--e-out) both;
+  }
+  @keyframes valIn {
+    from {
+      opacity: 0.2;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* ---------- cartões de regime ---------- */
+  .cards {
+    display: grid;
+    gap: var(--s-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(228px, 100%), 1fr));
+    align-items: start;
+  }
+  .rcard {
+    display: grid;
+    align-content: start;
+    gap: var(--s-4);
+    padding: clamp(1rem, 0.85rem + 0.6vw, 1.35rem);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    min-width: 0;
+  }
+  .rcard__kicker {
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .rcard__name {
+    margin-top: 0.2rem;
+  }
+  .rcard__figure {
+    display: grid;
+    gap: 0.2rem;
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .rcard__money {
+    font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.05rem);
+    line-height: 1.1;
+  }
+  .rcard__per {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+  .rcard__rate {
+    margin-top: var(--s-2);
+    font-size: var(--fs-xs);
+    color: var(--fg-soft);
+  }
+  .rcard__rate b {
+    color: var(--fg);
+  }
+  .rcard__note {
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-mute);
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--line);
+  }
+
+  /* aviso de teto */
+  .over {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-4);
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-soft);
+    background: color-mix(in srgb, var(--danger) 7%, transparent);
+    border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+    border-radius: var(--r-2);
+  }
+  .over__ico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--danger);
+    margin-top: 1px;
+  }
+  .over b {
+    color: var(--fg);
+  }
+
+  /* ---------- linhas do detalhamento ---------- */
+  .rows {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem var(--s-3);
+    align-items: baseline;
+  }
+  .row dt {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-soft);
+    line-height: 1.4;
+    min-width: 0;
+  }
+  .row__meta {
+    display: block;
+    margin-top: 2px;
+    font-weight: 400;
+    color: var(--fg-mute);
+    line-height: 1.45;
+  }
+  .row dd {
+    font-size: var(--fs-sm);
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .row__out {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-mute);
+  }
+  .row--icms dd {
+    white-space: normal;
+  }
+  .row--total {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--line-strong);
+  }
+  .row--total dt {
+    color: var(--fg);
+  }
+  .row--total dd {
+    font-size: var(--fs-h4);
+    font-weight: 700;
+  }
+
+  /* ---------- fator R ---------- */
+  .fator {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent-fill);
+    border-radius: var(--r-2);
+  }
+  .fator__ico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .fator__line {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+  }
+  .fator__note {
+    margin-top: var(--s-2);
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-mute);
+  }
+
+  /* ---------- veredito ---------- */
+  .verdict {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: clamp(1rem, 0.85rem + 0.7vw, 1.4rem);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+  }
+  .verdict::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-fill), transparent 72%);
+    border-radius: var(--r-3) var(--r-3) 0 0;
+  }
+  .verdict__label {
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .verdict__money {
+    font-size: clamp(1.6rem, 1.2rem + 1.7vw, 2.2rem);
+    line-height: 1.1;
+    color: var(--accent);
+  }
+  .verdict__text {
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg-soft);
+  }
+  .verdict--na .verdict__text {
+    margin-top: var(--s-1);
+  }
+
+  /* ---------- rodapé da seção ---------- */
+  .foot {
+    display: grid;
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+  }
+  .foot__icms {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-soft);
+  }
+  .foot__icms :global(svg) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+  .foot__icms b {
+    color: var(--fg);
+  }
+
+  /* ---------- largura ---------- */
+  @media (max-width: 359px) {
+    /* telas muito estreitas: a linha vira duas, em vez de espremer o rótulo */
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .row dd {
+      text-align: left;
+      white-space: normal;
+    }
+  }
+  @media (min-width: 1000px) {
+    .sheet {
+      grid-template-columns: 0.86fr 1.14fr;
+    }
+    .result {
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>

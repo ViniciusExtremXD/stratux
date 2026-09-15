@@ -1,0 +1,308 @@
+---
+import Icon from '~/components/Icon.astro';
+import { contact, faq, wa } from '~/data/site';
+
+/**
+ * Perguntas frequentes.
+ * <details>/<summary> nativos: abre, fecha e é operável por teclado sem uma
+ * linha de JavaScript. O primeiro item já vem aberto; os demais ficam livres —
+ * nada de accordion exclusivo forçado.
+ */
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.a,
+    },
+  })),
+};
+
+const askHref = wa(
+  'Olá! Vim pelo site da Stratux. Tenho uma dúvida que não está nas perguntas frequentes.',
+);
+---
+
+<section class="faq section" id="faq" aria-labelledby="faq-h">
+  <div class="shell">
+    <div class="faq__layout">
+      <div class="faq__aside">
+        <div class="sechead faq__head">
+          <p class="kicker" data-reveal="fade">Perguntas frequentes</p>
+          <h2 class="h2" id="faq-h" data-split>Respostas diretas, antes mesmo da primeira conversa.</h2>
+          <p class="lead" data-reveal style="--i:1">
+            As {faq.length} dúvidas que mais chegam até nós — troca de contador, custo, cobertura,
+            MEI e regularização. Se a sua não estiver na lista, é só perguntar.
+          </p>
+        </div>
+      </div>
+
+      <ul class="faq__list">
+        {
+          faq.map((item, i) => (
+            <li class="faq__item" data-reveal style={`--i:${i % 3}`}>
+              <details class="qa" open={i === 0}>
+                <summary class="qa__q">
+                  <span class="qa__n num" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="qa__text h4">{item.q}</span>
+                  <span class="qa__ind" aria-hidden="true">
+                    <Icon name="plus" size={17} />
+                  </span>
+                </summary>
+                <div class="qa__a">
+                  <p>{item.a}</p>
+                </div>
+              </details>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="faq__invite" data-reveal>
+        <span class="icobox faq__inviteico">
+          <Icon name="whatsapp" size={21} />
+        </span>
+
+        <div class="faq__invitetext">
+          <h3 class="h4 faq__invitetitle">Sua dúvida não está aqui?</h3>
+          <p class="faq__invitep">
+            Descreva o seu caso em uma mensagem — quanto mais contexto sobre a empresa ou a sua
+            situação, mais precisa é a resposta. {contact.responseTime}
+          </p>
+        </div>
+
+        <div class="faq__invitecta cluster">
+          <a class="btn btn--gold magnetic" href={askHref} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={17} class="btn__ico" />
+            <span>Perguntar pelo WhatsApp</span>
+          </a>
+          <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
+            <Icon name="phone" size={16} class="btn__ico" />
+            <span>{contact.phoneLabel}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+</section>
+
+<style>
+  .faq {
+    border-top: 1px solid var(--line);
+  }
+
+  .faq__layout {
+    display: grid;
+    gap: clamp(2rem, 1.2rem + 2.6vw, 3.25rem);
+    align-items: start;
+  }
+
+  /* ---------- cabeçalho ---------- */
+  .faq__head {
+    margin-bottom: 0;
+    max-width: 46ch;
+  }
+
+  /* ---------- lista ---------- */
+  .faq__list {
+    display: grid;
+    gap: var(--s-4);
+    min-width: 0;
+  }
+  .faq__item {
+    min-width: 0;
+  }
+
+  .qa {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      box-shadow var(--d-3) var(--e-out);
+  }
+  .qa::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-fill), transparent 72%);
+    border-radius: var(--r-3) var(--r-3) 0 0;
+    opacity: 0;
+    transition: opacity var(--d-2) var(--e-out);
+    pointer-events: none;
+  }
+  .qa:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--sh-2);
+  }
+  .qa[open] {
+    border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+    box-shadow: var(--sh-2);
+  }
+  .qa[open]::before {
+    opacity: 1;
+  }
+
+  /* pergunta */
+  .qa__q {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-4);
+    padding: var(--qa-pad, 1.15rem) var(--qa-pad, 1.15rem);
+    list-style: none;
+  }
+  .qa__q::-webkit-details-marker {
+    display: none;
+  }
+  .qa__n {
+    flex: none;
+    width: 2.4ch;
+    padding-top: 0.22em;
+    font-size: var(--fs-xs);
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    opacity: 0.85;
+    transition: opacity var(--d-2) var(--e-out);
+  }
+  .qa[open] .qa__n {
+    opacity: 1;
+  }
+  .qa__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.45;
+    transition: color var(--d-2) var(--e-out);
+  }
+  .qa:hover .qa__text,
+  .qa[open] .qa__text {
+    color: var(--accent);
+  }
+
+  /* indicador abrir/fechar */
+  .qa__ind {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-top: -1px;
+    color: var(--fg-mute);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .qa__ind :global(svg) {
+    transition: transform var(--d-3) var(--e-out);
+  }
+  .qa:hover .qa__ind {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .qa[open] .qa__ind {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+  }
+  .qa[open] .qa__ind :global(svg) {
+    transform: rotate(135deg);
+  }
+
+  /* resposta */
+  .qa__a {
+    padding: 0 var(--qa-pad, 1.15rem) var(--qa-pad, 1.15rem);
+    animation: qaOpen var(--d-3) var(--e-out) both;
+  }
+  .qa__a p {
+    max-width: 62ch;
+    font-size: var(--fs-sm);
+    line-height: 1.68;
+    color: var(--fg-soft);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  @keyframes qaOpen {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -7px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------- convite final ---------- */
+  .faq__invite {
+    display: grid;
+    gap: var(--s-4);
+    align-items: center;
+    padding: clamp(1.35rem, 1rem + 1.3vw, 2rem);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+    border-radius: var(--r-3);
+    background: color-mix(in srgb, var(--accent) 5%, var(--bg-raised));
+  }
+  .faq__inviteico {
+    border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  }
+  .faq__invitetitle {
+    margin-bottom: 0.3rem;
+  }
+  .faq__invitep {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--fg-soft);
+    max-width: 58ch;
+  }
+  .faq__invitecta {
+    gap: var(--s-3);
+  }
+
+  /* ---------- responsivo ---------- */
+  @media (min-width: 620px) {
+    .qa__q,
+    .qa__a {
+      --qa-pad: 1.6rem;
+    }
+    .qa__a {
+      padding-left: calc(1.6rem + 2.4ch + var(--s-4));
+    }
+  }
+
+  @media (min-width: 760px) {
+    .faq__invite {
+      grid-template-columns: auto 1fr auto;
+      gap: var(--s-5);
+    }
+  }
+
+  @media (min-width: 960px) {
+    .faq__layout {
+      grid-template-columns: 0.82fr 1.18fr;
+      column-gap: clamp(2.5rem, 1rem + 4vw, 4.5rem);
+    }
+    .faq__aside {
+      position: sticky;
+      top: 6.5rem;
+    }
+    .faq__list {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .faq__invite {
+      grid-column: 1 / -1;
+      margin-top: var(--s-3);
+    }
+  }
+</style>

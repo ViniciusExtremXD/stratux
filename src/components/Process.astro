@@ -1,0 +1,276 @@
+---
+import Icon from '~/components/Icon.astro';
+import { processSteps, faq, wa } from '~/data/site';
+
+/**
+ * Como trabalhamos — linha do tempo que se desenha na entrada da seção.
+ * Horizontal no desktop, vertical no mobile. A linha é um elemento real
+ * animado por scaleX/scaleY; sem JavaScript ela nasce desenhada por inteiro.
+ *
+ * O texto sobre migração de contador é o mesmo do FAQ — fonte única em site.ts.
+ */
+const migracao = faq.find((f) => f.q.startsWith('Trocar de contador'));
+
+const waMigracao = wa(
+  'Olá! Vim pelo site da Stratux, na seção Como trabalhamos. Já tenho contador e quero entender como funciona a migração.',
+);
+---
+
+<section class="proc section" id="processo" aria-labelledby="processo-h">
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Como trabalhamos</p>
+      <h2 class="h2" id="processo-h" data-split>
+        Quatro etapas, do diagnóstico ao relatório que serve para decidir.
+      </h2>
+      <p class="lead" data-reveal style="--i:1">
+        Nenhuma proposta antes de olhar a sua situação real. Depois disso, o calendário é nosso: a
+        rotina roda com aviso antes de cada vencimento e fecha com uma leitura do mês.
+      </p>
+    </div>
+
+    <div class="proc__track">
+      <div class="proc__rail" data-reveal="fade" aria-hidden="true">
+        <span class="proc__line"></span>
+      </div>
+
+      <ol class="proc__steps">
+        {
+          processSteps.map((step, i) => (
+            <li class="proc__step" data-reveal style={`--i:${i}`}>
+              <span class="proc__node" aria-hidden="true" />
+              <div class="proc__head">
+                <span class="proc__n num" aria-hidden="true">
+                  {step.n}
+                </span>
+                <span class="icobox proc__ico">
+                  <Icon name={step.icon} size={21} />
+                </span>
+              </div>
+              <h3 class="h4 proc__title">{step.title}</h3>
+              <p class="proc__text">{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    {
+      migracao && (
+        <aside class="proc__migra card on-navy" data-reveal aria-labelledby="processo-migra-h">
+          <div class="proc__migrahead">
+            <span class="icobox">
+              <Icon name="transfer" size={21} />
+            </span>
+            <span class="badge badge--gold">Troca de escritório</span>
+          </div>
+
+          <div class="proc__migracopy">
+            <h3 class="h3 proc__migratitle" id="processo-migra-h">
+              {migracao.q}
+            </h3>
+            <p class="proc__migratext">{migracao.a}</p>
+          </div>
+
+          <a class="btn btn--gold proc__migracta" href={waMigracao} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={17} class="btn__ico" />
+            <span>Falar sobre a migração</span>
+          </a>
+        </aside>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .proc {
+    background: var(--bg-raised);
+    border-block: 1px solid var(--line);
+  }
+
+  /* ---------- trilho ---------- */
+  .proc__track {
+    --dot: 14px;
+    position: relative;
+  }
+
+  .proc__rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--dot) / 2 - 1px);
+    width: 2px;
+    pointer-events: none;
+  }
+  .proc__line {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--r-pill);
+    background: linear-gradient(
+      180deg,
+      var(--accent-fill) 0%,
+      var(--accent-fill) 74%,
+      transparent 100%
+    );
+    transform-origin: 50% 0;
+    transition: transform var(--d-5) var(--e-out) 90ms;
+  }
+
+  /* ---------- etapas ---------- */
+  .proc__steps {
+    display: grid;
+    gap: var(--s-7);
+  }
+  .proc__step {
+    position: relative;
+    padding-left: calc(var(--dot) + var(--s-5));
+  }
+  .proc__node {
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: var(--dot);
+    height: var(--dot);
+    border-radius: 50%;
+    background: var(--accent-fill);
+    box-shadow: 0 0 0 4px var(--bg-raised);
+  }
+
+  .proc__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-4);
+  }
+  .proc__n {
+    font-size: clamp(1.95rem, 1.45rem + 1.5vw, 2.6rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+  }
+  .proc__ico {
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      transform var(--d-2) var(--e-out);
+  }
+  .proc__step:hover .proc__ico {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .proc__title {
+    margin-bottom: var(--s-2);
+  }
+  .proc__text {
+    max-width: 58ch;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--fg-mute);
+  }
+
+  /* ---------- migração de contador ---------- */
+  .proc__migra {
+    display: grid;
+    gap: var(--s-5);
+    margin-top: clamp(2.75rem, 1.8rem + 3vw, 4.5rem);
+    padding: clamp(1.5rem, 1rem + 1.8vw, 2.5rem);
+    box-shadow: var(--sh-3);
+    align-items: start;
+  }
+  .proc__migrahead {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    flex-wrap: wrap;
+  }
+  .proc__migracopy {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .proc__migratitle {
+    max-width: 24ch;
+  }
+  .proc__migratext {
+    max-width: 62ch;
+    color: var(--fg-soft);
+  }
+  .proc__migracta {
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  /* ---------- desktop: linha do tempo horizontal ---------- */
+  @media (min-width: 900px) {
+    .proc__rail {
+      top: calc(var(--dot) / 2 - 1px);
+      bottom: auto;
+      left: 0;
+      right: 0;
+      width: auto;
+      height: 2px;
+    }
+    .proc__line {
+      background: linear-gradient(
+        90deg,
+        var(--accent-fill) 0%,
+        var(--accent-fill) 74%,
+        transparent 100%
+      );
+      transform-origin: 0 50%;
+    }
+    .proc__steps {
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--s-5);
+      align-items: start;
+    }
+    .proc__step {
+      padding-left: 0;
+      padding-top: calc(var(--dot) + var(--s-5));
+      padding-right: var(--s-4);
+    }
+    .proc__node {
+      top: 0;
+    }
+    .proc__head {
+      justify-content: flex-start;
+      gap: var(--s-4);
+    }
+
+    .proc__migra {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: var(--s-6);
+      align-items: center;
+    }
+    .proc__migrahead {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--s-3);
+    }
+  }
+
+  /* ---------- desenho da linha ----------
+     Sem JavaScript o trilho já nasce inteiro: só encolhe sob html.js, e volta
+     a 100% quando a seção é revelada. As redes de segurança vêm depois, para
+     vencer por ordem de origem com a mesma especificidade. */
+  :global(html.js) .proc__line {
+    transform: scaleY(0);
+  }
+  @media (min-width: 900px) {
+    :global(html.js) .proc__line {
+      transform: scaleX(0);
+    }
+  }
+  :global(html.js) .proc__rail.is-in .proc__line {
+    transform: none;
+  }
+
+  :global(html.motion-failed) .proc__line,
+  :global(html.motion-reduced) .proc__line {
+    transform: none;
+    transition: none;
+  }
+</style>

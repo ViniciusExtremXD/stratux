@@ -1,0 +1,596 @@
+---
+import Icon from '~/components/Icon.astro';
+import { regions, legal, wa } from '~/data/site';
+
+/**
+ * Mapa de atendimento — diagrama próprio, em SVG inline.
+ * Nada de mapa de terceiro: sem iframe, sem requisição externa, sem JS.
+ * As ligações se desenham por @keyframes (fill-mode both), então funcionam
+ * mesmo se o motor de movimento nunca subir. A revelação apenas destrava a
+ * reprodução quando o bloco entra na tela.
+ */
+
+/* Geografia esquemática: direção real, escala livre.
+   Osasco a oeste, Jundiaí ao norte, Santos ao sul, no litoral. */
+const VB = { w: 460, h: 380 };
+
+type Spot = { x: number; y: number; up?: boolean; node: string; tag: string };
+
+const geo: Record<string, Spot> = {
+  'São Paulo': { x: 236, y: 186, node: '0.22s', tag: '0.40s' },
+  Osasco: { x: 88, y: 206, node: '0.80s', tag: '0.90s' },
+  Jundiaí: { x: 252, y: 66, up: true, node: '0.88s', tag: '0.98s' },
+  Santos: { x: 268, y: 306, node: '0.96s', tag: '1.06s' },
+};
+
+const pc = (v: number, total: number) => `${((v / total) * 100).toFixed(2)}%`;
+
+const gridX = Array.from({ length: 9 }, (_, i) => 46 * (i + 1));
+const gridY = Array.from({ length: 7 }, (_, i) => 47.5 * (i + 1));
+
+/* Litoral: uma curva só, usada como traço e como limite da mancha de mar. */
+const COAST = 'M-4 352C90 344 180 330 268 306C344 286 404 258 464 232';
+const SEA = `${COAST}L464 386L-4 386Z`;
+
+const links = [
+  { to: 'Osasco', d: 'M236 186Q166 180 88 206', delay: '0.34s' },
+  { to: 'Jundiaí', d: 'M236 186Q228 122 252 66', delay: '0.42s' },
+  { to: 'Santos', d: 'M236 186Q246 246 268 306', delay: '0.50s' },
+];
+
+const addr = legal.address;
+const addrLine1 = `${addr.street} — ${addr.complement}`;
+const addrLine2 = `${addr.city}/${addr.state} · CEP ${addr.zip}`;
+
+const isHub = (role: string) => role === 'Matriz';
+
+const waRegiao = wa(
+  'Olá! Vim pelo site da Stratux e gostaria de saber como funciona o atendimento na minha região.',
+);
+---
+
+<section class="regioes section" id="atendimento" aria-labelledby="atendimento-h">
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Atendimento</p>
+      <h2 class="h2" id="atendimento-h" data-split>
+        Quatro praças no estado de São Paulo, clientes em todo o país.
+      </h2>
+      <p class="lead" data-reveal style="--i:1">
+        A matriz fica na Zona Leste da capital. De lá o atendimento presencial se abre para a Grande
+        São Paulo, para o interior e para o litoral — enquanto a rotina contábil inteira roda em
+        ambiente digital.
+      </p>
+    </div>
+
+    <div class="regioes__body">
+      <figure class="mapa card" data-reveal="scale">
+        <div class="mapa__stage" aria-hidden="true">
+          <svg
+            class="mapa__svg"
+            viewBox={`0 0 ${VB.w} ${VB.h}`}
+            width={VB.w}
+            height={VB.h}
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="rgnSea" x1="0" y1="240" x2="360" y2="386" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="var(--navy-500)" stop-opacity="0.20" />
+                <stop offset="1" stop-color="var(--navy-500)" stop-opacity="0.05" />
+              </linearGradient>
+            </defs>
+
+            {/* malha de referência — papel quadriculado de relatório */}
+            <g class="mapa__grid mapa__fx">
+              {gridX.map((x) => <line class="mapa__gridline" x1={x} y1="0" x2={x} y2={VB.h} />)}
+              {gridY.map((y) => <line class="mapa__gridline" x1="0" y1={y} x2={VB.w} y2={y} />)}
+            </g>
+
+            {/* litoral */}
+            <path class="mapa__sea mapa__fx" d={SEA} fill="url(#rgnSea)" />
+            <path class="mapa__coast mapa__fx" d={COAST} />
+
+            {/* ligações a partir da matriz */}
+            {
+              links.map((l) => (
+                <path class="mapa__link mapa__fx" d={l.d} style={`--d:${l.delay}`} />
+              ))
+            }
+
+            {/* halo da matriz */}
+            <circle
+              class="mapa__halo mapa__fx"
+              cx={geo['São Paulo'].x}
+              cy={geo['São Paulo'].y}
+              r="27"
+            />
+            <circle
+              class="mapa__ring mapa__fx"
+              cx={geo['São Paulo'].x}
+              cy={geo['São Paulo'].y}
+              r="16"
+            />
+
+            {/* nós */}
+            {
+              regions.map((r) => {
+                const g = geo[r.city];
+                return (
+                  <g class="mapa__node mapa__fx" style={`--d:${g.node}`}>
+                    <circle
+                      class={isHub(r.role) ? 'mapa__dot mapa__dot--hub' : 'mapa__dot'}
+                      cx={g.x}
+                      cy={g.y}
+                      r={isHub(r.role) ? 8 : 6}
+                    />
+                    {!isHub(r.role) && <circle class="mapa__core" cx={g.x} cy={g.y} r="2.4" />}
+                  </g>
+                );
+              })
+            }
+          </svg>
+
+          {
+            regions.map((r) => {
+              const g = geo[r.city];
+              return (
+                <span
+                  class:list={[
+                    'mapa__tag',
+                    'mapa__fx',
+                    { 'mapa__tag--up': g.up, 'mapa__tag--hub': isHub(r.role) },
+                  ]}
+                  style={`--x:${pc(g.x, VB.w)};--y:${pc(g.y, VB.h)};--d:${g.tag}`}
+                >
+                  {r.city}
+                </span>
+              );
+            })
+          }
+
+          <span class="mapa__sealabel mapa__fx">Litoral</span>
+        </div>
+
+        <figcaption class="mapa__cap">
+          Esquema ilustrativo. As praças aparecem na direção real — Osasco a oeste, Jundiaí ao
+          norte, Santos ao sul, no litoral —, mas o desenho não está em escala nem representa
+          limites de município.
+        </figcaption>
+      </figure>
+
+      <ul class="pracas">
+        {
+          regions.map((r, i) => (
+            <li class="praca card card--hover" data-reveal style={`--i:${i % 2}`}>
+              <span class="card__rule" aria-hidden="true" />
+
+              <div class="praca__head">
+                <h3 class="h4 praca__city">{r.city}</h3>
+                <span class:list={['badge', { 'badge--gold': isHub(r.role) }]}>{r.role}</span>
+              </div>
+
+              <p class="praca__covers">
+                <span class="praca__lbl">Cobre</span>
+                <span>{r.covers}</span>
+              </p>
+
+              <p class="praca__detail">{r.detail}</p>
+
+              {isHub(r.role) && (
+                <address class="praca__addr">
+                  <span class="praca__addrico" aria-hidden="true">
+                    <Icon name="pin" size={16} />
+                  </span>
+                  <span class="praca__addrtext">
+                    <span class="praca__lbl">Endereço da matriz</span>
+                    <span class="praca__addrline">{addrLine1}</span>
+                    <span class="praca__addrline">{addrLine2}</span>
+                  </span>
+                </address>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="regioes__foot" data-reveal>
+      <p class="regioes__digital">
+        <span class="regioes__digitalico" aria-hidden="true"><Icon name="globe" size={18} /></span>
+        <span>
+          Todo o trabalho é digital — documentos, assinaturas e reuniões acontecem online. Por isso
+          atendemos clientes em qualquer cidade do país; as praças acima indicam onde também há
+          atendimento presencial.
+        </span>
+      </p>
+
+      <div class="cluster regioes__cta">
+        <a class="btn btn--gold magnetic" href={waRegiao} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={18} class="btn__ico" />
+          <span>Falar sobre atendimento na minha região</span>
+        </a>
+        <a class="btn btn--ghost" href="#servicos">
+          <span>Ver os serviços</span>
+          <Icon name="arrowUpRight" size={16} class="btn__ico" />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---------------------------------------------------------------- base */
+  .regioes__body {
+    display: grid;
+    gap: clamp(1.75rem, 1rem + 3vw, 3rem);
+    align-items: start;
+  }
+
+  /* ------------------------------------------------------------- diagrama */
+  .mapa {
+    margin: 0;
+    display: grid;
+    gap: var(--s-4);
+  }
+  .mapa__stage {
+    position: relative;
+    width: 100%;
+  }
+  .mapa__svg {
+    width: 100%;
+    height: auto;
+  }
+  .mapa__cap {
+    font-size: var(--fs-xs);
+    line-height: 1.55;
+    color: var(--fg-mute);
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--line);
+  }
+
+  .mapa__gridline {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+  .mapa__grid {
+    opacity: 0;
+    animation: rgnFade var(--d-3) var(--e-out) 0.05s both;
+  }
+  .mapa__sea {
+    opacity: 0;
+    animation: rgnFade var(--d-4) var(--e-soft) 0.12s both;
+  }
+  .mapa__coast {
+    fill: none;
+    stroke: var(--navy-500);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    opacity: 0.55;
+    stroke-dasharray: 620;
+    stroke-dashoffset: 620;
+    animation: rgnDrawCoast var(--d-4) var(--e-out) 0.18s both;
+  }
+  .mapa__link {
+    fill: none;
+    stroke: var(--accent-fill);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    opacity: 0.85;
+    animation: rgnDraw var(--d-3) var(--e-out) var(--d, 0.3s) both;
+  }
+
+  .mapa__halo {
+    fill: color-mix(in srgb, var(--accent-fill) 16%, transparent);
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: rgnHalo var(--d-4) var(--e-out) 0.2s both;
+  }
+  .mapa__ring {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.45;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: rgnRing var(--d-4) var(--e-out) 0.3s both;
+  }
+
+  .mapa__dot {
+    fill: var(--bg-raised);
+    stroke: var(--navy-600);
+    stroke-width: 2;
+  }
+  .mapa__dot--hub {
+    fill: var(--accent-fill);
+    stroke: var(--navy-900);
+    stroke-width: 2.4;
+  }
+  .mapa__core {
+    fill: var(--navy-700);
+  }
+  .mapa__node {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: rgnPop var(--d-3) var(--e-out) var(--d, 0.5s) both;
+  }
+
+  /* Rótulos: HTML de verdade sobre o desenho, para continuarem legíveis
+     mesmo quando o SVG encolhe no celular.
+
+     A entrada deles é só de transform — nunca de opacidade. Estes são os
+     únicos elementos de texto do diagrama, e o escalonamento os deixaria
+     apagados por até 1,8s enquanto o atraso corresse. Com transform puro, o
+     nome da praça está legível desde o primeiro quadro, em qualquer estado do
+     motor de movimento, inclusive sem JavaScript nenhum. */
+  .mapa__tag {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    max-width: 96%;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    line-height: 1.35;
+    white-space: nowrap;
+    color: var(--fg);
+    background: var(--bg-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transform: translate(-50%, 0.9rem);
+    animation: rgnTagDown var(--d-4) var(--e-out) var(--d, 0.6s) both;
+  }
+  .mapa__tag--up {
+    transform: translate(-50%, calc(-100% - 0.7rem));
+    animation-name: rgnTagUp;
+  }
+  .mapa__tag--hub {
+    border-color: color-mix(in srgb, var(--accent) 48%, transparent);
+    box-shadow: var(--sh-1);
+  }
+  .mapa__tag--hub::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-fill);
+  }
+  .mapa__sealabel {
+    position: absolute;
+    right: 1%;
+    bottom: 2%;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+    animation: rgnSeaLabel var(--d-4) var(--e-out) 0.8s both;
+  }
+
+  /* -------------------------------------------------------- lista de praças */
+  .pracas {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .praca {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+  }
+  .praca__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+  }
+  .praca__city {
+    margin: 0;
+  }
+  .praca__lbl {
+    display: block;
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+    line-height: 1.5;
+  }
+  .praca__covers {
+    display: grid;
+    gap: 0.1rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.45;
+  }
+  .praca__detail {
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    line-height: 1.6;
+  }
+  .praca__addr {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    margin-top: var(--s-1);
+    padding: var(--s-3) var(--s-4);
+    font-style: normal;
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent-fill);
+    border-radius: 0 var(--r-2) var(--r-2) 0;
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+  }
+  .praca__addrico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+  .praca__addrtext {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .praca__addrline {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .praca__addrline + .praca__addrline {
+    font-weight: 500;
+    color: var(--fg-soft);
+  }
+
+  /* ------------------------------------------------------------- rodapé */
+  .regioes__foot {
+    display: grid;
+    gap: var(--s-5);
+    margin-top: clamp(1.75rem, 1rem + 2.4vw, 2.75rem);
+    padding-top: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
+    border-top: 1px solid var(--line);
+  }
+  .regioes__digital {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    max-width: 78ch;
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    color: var(--fg-soft);
+  }
+  .regioes__digitalico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+  .regioes__cta {
+    gap: var(--s-4);
+  }
+
+  /* --------------------------------------------------------- @keyframes
+     Todas com fill-mode both: rodam sozinhas, sem JavaScript nenhum. */
+  @keyframes rgnFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes rgnDraw {
+    from {
+      stroke-dashoffset: 200;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes rgnDrawCoast {
+    from {
+      stroke-dashoffset: 620;
+      opacity: 0;
+    }
+    to {
+      stroke-dashoffset: 0;
+      opacity: 0.55;
+    }
+  }
+  @keyframes rgnPop {
+    from {
+      opacity: 0;
+      transform: scale(0.45);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes rgnHalo {
+    from {
+      opacity: 0;
+      transform: scale(0.35);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes rgnRing {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+  }
+  /* Sem opacidade: ver a nota em .mapa__tag. */
+  @keyframes rgnTagDown {
+    from {
+      transform: translate(-50%, 1.9rem);
+    }
+    to {
+      transform: translate(-50%, 0.9rem);
+    }
+  }
+  @keyframes rgnTagUp {
+    from {
+      transform: translate(-50%, calc(-100% + 0.3rem));
+    }
+    to {
+      transform: translate(-50%, calc(-100% - 0.7rem));
+    }
+  }
+  @keyframes rgnSeaLabel {
+    from {
+      transform: translateY(0.5rem);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /* Com o motor vivo, a sequência espera o bloco entrar na tela.
+     As duas regras seguintes são a rede de segurança: se o motor falhar ou
+     o visitante pedir menos movimento, a reprodução volta a rodar sozinha. */
+  :global(html.js) .mapa:not(.is-in) .mapa__fx {
+    animation-play-state: paused;
+  }
+  :global(html.motion-failed) .mapa:not(.is-in) .mapa__fx,
+  :global(html.motion-reduced) .mapa:not(.is-in) .mapa__fx {
+    animation-play-state: running;
+  }
+
+  /* ------------------------------------------------------------ respostas */
+  @media (min-width: 640px) {
+    .pracas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 980px) {
+    .regioes__body {
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+      gap: clamp(2rem, 1rem + 3vw, 3.25rem);
+    }
+    .pracas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .regioes__foot {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--s-6);
+    }
+  }
+</style>

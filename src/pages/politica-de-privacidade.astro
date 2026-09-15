@@ -1,0 +1,847 @@
+---
+import Base from '~/layouts/Base.astro';
+import Icon from '~/components/Icon.astro';
+import { brand, contact, legal, wa } from '~/data/site';
+
+/**
+ * Política de privacidade — documento aplicável a este site, redigido para a
+ * LGPD (Lei nº 13.709/2018).
+ *
+ * O texto descreve exatamente o que o site faz: formulário de contato que
+ * conduz a conversa para o WhatsApp, nenhum cookie de rastreamento, nenhum
+ * analytics de terceiro, e dois itens de armazenamento local que não saem do
+ * aparelho do visitante.
+ *
+ * Pendências com o cliente: revisão jurídica do texto e e-mail do encarregado
+ * (DPO) — ver o bloco "Encarregado (DPO): a confirmar" na seção 10.
+ */
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const home = base || '/';
+const addr = legal.address;
+
+const updated = 'setembro de 2026';
+
+const waRights = wa(
+  'Olá! Vim pela política de privacidade do site da Stratux e quero exercer um direito sobre os meus dados pessoais.',
+);
+
+/** Sumário — os mesmos títulos usados nas seções abaixo. */
+const toc = [
+  { id: 'controlador', n: '01', title: 'Quem trata os seus dados' },
+  { id: 'dados', n: '02', title: 'Quais dados coletamos' },
+  { id: 'finalidades', n: '03', title: 'Para que usamos os seus dados' },
+  { id: 'base-legal', n: '04', title: 'Com qual base legal tratamos' },
+  { id: 'compartilhamento', n: '05', title: 'Com quem compartilhamos' },
+  { id: 'prazo', n: '06', title: 'Por quanto tempo guardamos' },
+  { id: 'seguranca', n: '07', title: 'Como protegemos os seus dados' },
+  { id: 'cookies', n: '08', title: 'Cookies e armazenamento local' },
+  { id: 'direitos', n: '09', title: 'Os seus direitos na LGPD' },
+  { id: 'exercicio', n: '10', title: 'Como exercer os seus direitos' },
+  { id: 'terceiros', n: '11', title: 'Links e serviços de terceiros' },
+  { id: 'alteracoes', n: '12', title: 'Alterações desta política' },
+];
+
+/** Campos do formulário de contato deste site. */
+const campos = [
+  { field: 'Nome', why: 'Para saber com quem estamos falando e responder pelo seu nome.' },
+  { field: 'Telefone', why: 'Para retornar o contato por ligação ou por WhatsApp.' },
+  {
+    field: 'E-mail',
+    why: 'Para responder por escrito e, quando você pedir, enviar proposta ou orientação.',
+  },
+  {
+    field: 'Perfil',
+    why: 'Pessoa física, MEI ou empresa. Define quem atende e o que é relevante na resposta.',
+  },
+  { field: 'Assunto', why: 'O serviço ou a dúvida que motivou o contato.' },
+  {
+    field: 'Mensagem',
+    why: 'O que você escrever. Não é necessário enviar documento, senha ou dado bancário por aqui.',
+  },
+];
+
+/** Art. 18 da LGPD, inciso a inciso, com a tradução em uma linha. */
+const direitos = [
+  {
+    n: 'I',
+    title: 'Confirmação da existência de tratamento',
+    text: 'Saber se a Stratux trata algum dado pessoal seu.',
+  },
+  {
+    n: 'II',
+    title: 'Acesso aos dados',
+    text: 'Receber cópia dos dados pessoais que mantemos sobre você.',
+  },
+  {
+    n: 'III',
+    title: 'Correção de dados incompletos, inexatos ou desatualizados',
+    text: 'Pedir o ajuste de qualquer informação errada ou vencida.',
+  },
+  {
+    n: 'IV',
+    title: 'Anonimização, bloqueio ou eliminação',
+    text: 'Quanto a dados desnecessários, excessivos ou tratados em desconformidade com a lei.',
+  },
+  {
+    n: 'V',
+    title: 'Portabilidade a outro fornecedor',
+    text: 'Mediante requisição expressa, observados os segredos comercial e industrial.',
+  },
+  {
+    n: 'VI',
+    title: 'Eliminação dos dados tratados com o seu consentimento',
+    text: 'Exceto nas hipóteses de conservação previstas no art. 16 da LGPD, como o cumprimento de obrigação legal.',
+  },
+  {
+    n: 'VII',
+    title: 'Informação sobre o uso compartilhado',
+    text: 'Saber com quais entidades públicas e privadas compartilhamos os seus dados.',
+  },
+  {
+    n: 'VIII',
+    title: 'Informação sobre a possibilidade de não consentir',
+    text: 'Saber que você pode negar o consentimento e quais são as consequências disso.',
+  },
+  {
+    n: 'IX',
+    title: 'Revogação do consentimento',
+    text: 'Retirar, a qualquer momento, o consentimento que você deu.',
+  },
+];
+
+const title = `Política de Privacidade — ${brand.full}`;
+const description =
+  'Como a Stratux Consultoria Empresarial coleta, usa, guarda e protege os dados pessoais de quem entra em contato pelo site, conforme a LGPD (Lei nº 13.709/2018).';
+---
+
+<Base title={title} description={description} path="/politica-de-privacidade">
+  <section class="pphead on-navy navy-field" id="politica" aria-labelledby="pp-h">
+    <div class="pphead__inner shell shell--text">
+      <p class="kicker" data-reveal="fade">Documento legal</p>
+
+      <h1 class="h1 pphead__title" id="pp-h" data-split>Política de Privacidade</h1>
+
+      <p class="lead pphead__lead" data-reveal style="--i:1">
+        Este documento explica quais dados pessoais a Stratux coleta neste site, para que os usa,
+        com quem os compartilha, por quanto tempo os guarda e como você pode exercer os seus
+        direitos, nos termos da Lei Geral de Proteção de Dados — Lei nº 13.709/2018.
+      </p>
+
+      <ul class="pphead__meta" data-reveal style="--i:2">
+        <li><Icon name="calendar" size={15} /><span>Última atualização: {updated}</span></li>
+        <li><Icon name="globe" size={15} /><span>Aplica-se a {brand.domain}</span></li>
+        <li><Icon name="shield" size={15} /><span>Lei nº 13.709/2018 (LGPD)</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section ppdoc" id="documento" aria-label="Texto da política de privacidade">
+    <div class="shell shell--text">
+      <nav class="pptoc" aria-labelledby="toc-h" data-reveal>
+        <h2 class="kicker pptoc__h" id="toc-h">Conteúdo desta política</h2>
+        <ol class="pptoc__list">
+          {
+            toc.map((t) => (
+              <li>
+                <a href={`#${t.id}`}>
+                  <span class="pptoc__n num">{t.n}</span>
+                  <span class="pptoc__t">{t.title}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+
+      <article class="ppbody">
+        <!-- 01 -------------------------------------------------------------- -->
+        <section class="ppsec" id="controlador" aria-labelledby="controlador-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="controlador-h">
+            <span class="ppsec__n num">01</span>Quem trata os seus dados
+          </h2>
+          <p>
+            O controlador dos dados pessoais coletados neste site — ou seja, a empresa que decide
+            como e para que eles são usados — é:
+          </p>
+          <div class="ppcard">
+            <p class="ppcard__name">{brand.legalName}</p>
+            <ul class="ppcard__list">
+              <li><Icon name="stamp" size={15} /><span>CNPJ {brand.cnpj}</span></li>
+              <li>
+                <Icon name="pin" size={15} />
+                <span>
+                  {addr.street}, {addr.complement} — {addr.city}/{addr.state} — CEP {addr.zip}
+                </span>
+              </li>
+              <li>
+                <Icon name="phone" size={15} />
+                <span>Telefone e WhatsApp: {contact.phoneLabel}</span>
+              </li>
+            </ul>
+          </div>
+          <p>
+            Esta política vale para o site {brand.domain} e para o contato iniciado por ele. O
+            tratamento de dados de clientes já contratados segue, além desta política, o contrato de
+            prestação de serviços e o dever de sigilo profissional do contador.
+          </p>
+        </section>
+
+        <!-- 02 -------------------------------------------------------------- -->
+        <section class="ppsec" id="dados" aria-labelledby="dados-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="dados-h">
+            <span class="ppsec__n num">02</span>Quais dados coletamos
+          </h2>
+          <p>
+            Coletamos apenas o que você informa por vontade própria. O formulário de contato deste
+            site tem seis campos:
+          </p>
+          <dl class="ppdl">
+            {
+              campos.map((c) => (
+                <div class="ppdl__row">
+                  <dt>{c.field}</dt>
+                  <dd>{c.why}</dd>
+                </div>
+              ))
+            }
+          </dl>
+          <p>
+            O site é estático e não mantém cadastro de visitantes: os campos acima são usados para
+            montar a mensagem de contato que você envia à Stratux pelo WhatsApp, a partir do seu
+            próprio aparelho. Se preferir, você pode simplesmente ligar — nenhum campo do site é
+            obrigatório para falar com a gente.
+          </p>
+          <p>
+            Se você continuar a conversa por WhatsApp, por telefone ou por e-mail, passamos a tratar
+            também o que for enviado nessa conversa: dados da empresa, documentos e informações
+            contábeis, fiscais ou trabalhistas necessários para responder ou para prestar o serviço.
+          </p>
+          <p>
+            O serviço de hospedagem do site pode registrar, para segurança e funcionamento, dados
+            técnicos de acesso como endereço IP, data, hora e tipo de navegador. Esses registros são
+            do provedor de infraestrutura, não são usados pela Stratux para identificar você nem
+            para publicidade.
+          </p>
+        </section>
+
+        <!-- 03 -------------------------------------------------------------- -->
+        <section class="ppsec" id="finalidades" aria-labelledby="finalidades-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="finalidades-h">
+            <span class="ppsec__n num">03</span>Para que usamos os seus dados
+          </h2>
+          <ul class="pplist">
+            <li>responder ao seu contato e esclarecer as dúvidas que você trouxe;</li>
+            <li>entender a sua situação e apresentar proposta de serviço, quando você pedir;</li>
+            <li>
+              prestar os serviços contábeis, fiscais, trabalhistas e societários contratados,
+              inclusive a entrega de obrigações em seu nome perante órgãos públicos;
+            </li>
+            <li>
+              cumprir as obrigações legais e regulatórias a que a Stratux está sujeita como
+              escritório de contabilidade;
+            </li>
+            <li>
+              manter registro do que foi contratado e do que foi entregue, para exercício regular de
+              direitos.
+            </li>
+          </ul>
+          <p class="ppstrong">
+            Não usamos os seus dados para publicidade comportamental, não montamos perfil de
+            consumo, não fazemos disparo de marketing em massa e não vendemos a sua informação.
+          </p>
+        </section>
+
+        <!-- 04 -------------------------------------------------------------- -->
+        <section class="ppsec" id="base-legal" aria-labelledby="base-legal-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="base-legal-h">
+            <span class="ppsec__n num">04</span>Com qual base legal tratamos
+          </h2>
+          <p>
+            A LGPD exige que todo tratamento tenha uma base legal. Aqui, as bases são estas, na
+            ordem em que costumam aparecer:
+          </p>
+          <dl class="ppdl">
+            <div class="ppdl__row">
+              <dt>Consentimento</dt>
+              <dd>
+                Art. 7º, I. É o que acontece quando você preenche e envia o formulário ou nos escreve
+                pelo WhatsApp: você decide entregar aqueles dados para receber uma resposta. Pode ser
+                revogado a qualquer momento.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt>Execução de contrato</dt>
+              <dd>
+                Art. 7º, V. Abrange os procedimentos preliminares a pedido do titular — orçamento,
+                proposta, diagnóstico — e a execução do contrato de prestação de serviços contábeis.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt>Cumprimento de obrigação legal</dt>
+              <dd>
+                Art. 7º, II. Sustenta a guarda de documentos contábeis e fiscais e a entrega de
+                declarações e obrigações acessórias exigidas da Stratux ou do cliente.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt>Exercício regular de direitos</dt>
+              <dd>
+                Art. 7º, VI. Permite conservar o registro do que foi contratado e entregue para
+                defesa em eventual discussão administrativa, judicial ou arbitral.
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- 05 -------------------------------------------------------------- -->
+        <section class="ppsec" id="compartilhamento" aria-labelledby="compartilhamento-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="compartilhamento-h">
+            <span class="ppsec__n num">05</span>Com quem compartilhamos
+          </h2>
+          <p class="ppstrong">
+            A Stratux não vende, não aluga e não cede os seus dados pessoais a terceiros.
+          </p>
+          <p>O compartilhamento acontece apenas nas hipóteses abaixo, no limite do necessário:</p>
+          <ul class="pplist">
+            <li>
+              <strong>Operadores</strong> que dão suporte à operação — hospedagem do site, correio
+              eletrônico, sistemas de contabilidade, folha de pagamento e certificação digital. Eles
+              tratam os dados apenas conforme as instruções da Stratux e estão obrigados à
+              confidencialidade.
+            </li>
+            <li>
+              <strong>Órgãos públicos</strong>, quando a entrega é a própria finalidade do serviço
+              contratado — Receita Federal, prefeitura, Junta Comercial, Caixa, eSocial e demais
+              cadastros obrigatórios.
+            </li>
+            <li>
+              <strong>Autoridades judiciais ou administrativas</strong>, mediante ordem, requisição
+              legal ou para cumprimento de obrigação legal ou regulatória.
+            </li>
+          </ul>
+          <p>
+            Não realizamos transferência internacional de dados com finalidade comercial. A
+            infraestrutura que hospeda este site pode operar servidores fora do Brasil; nesse caso, o
+            tratamento se limita ao necessário para exibir as páginas ao visitante.
+          </p>
+        </section>
+
+        <!-- 06 -------------------------------------------------------------- -->
+        <section class="ppsec" id="prazo" aria-labelledby="prazo-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="prazo-h">
+            <span class="ppsec__n num">06</span>Por quanto tempo guardamos
+          </h2>
+          <ul class="pplist">
+            <li>
+              <strong>Contato que não vira contrato:</strong> mantemos o registro da conversa
+              enquanto ele for útil ao atendimento. Você pode pedir a eliminação a qualquer momento.
+            </li>
+            <li>
+              <strong>Cliente contratado:</strong> durante toda a vigência do contrato e, depois
+              dele, pelos prazos de guarda exigidos pela legislação contábil, fiscal, trabalhista e
+              previdenciária aplicável a cada documento, e pelos prazos de prescrição
+              correspondentes.
+            </li>
+            <li>
+              <strong>Dados tratados com base no seu consentimento:</strong> até a revogação, salvo
+              quando houver outra base legal que imponha a conservação, conforme o art. 16 da LGPD.
+            </li>
+          </ul>
+          <p>
+            Não fixamos aqui um número de anos porque o prazo varia conforme o documento e a lei que
+            o exige. A regra que seguimos é objetiva: guardar pelo tempo determinado pela legislação
+            e eliminar em seguida.
+          </p>
+        </section>
+
+        <!-- 07 -------------------------------------------------------------- -->
+        <section class="ppsec" id="seguranca" aria-labelledby="seguranca-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="seguranca-h">
+            <span class="ppsec__n num">07</span>Como protegemos os seus dados
+          </h2>
+          <p>
+            Adotamos medidas técnicas e administrativas compatíveis com o porte da operação: acesso
+            restrito às pessoas que precisam do dado para trabalhar, autenticação nos sistemas
+            utilizados, uso de certificado digital nas transmissões a órgãos públicos, conexão segura
+            no site e o dever de sigilo profissional que vincula toda a equipe.
+          </p>
+          <p>
+            Nenhum sistema é infalível. Se ocorrer incidente de segurança que possa acarretar risco
+            ou dano relevante a você, comunicaremos o titular e a Autoridade Nacional de Proteção de
+            Dados (ANPD), como determina o art. 48 da LGPD.
+          </p>
+        </section>
+
+        <!-- 08 -------------------------------------------------------------- -->
+        <section class="ppsec" id="cookies" aria-labelledby="cookies-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="cookies-h">
+            <span class="ppsec__n num">08</span>Cookies e armazenamento local
+          </h2>
+          <p class="ppstrong">
+            Este site não usa cookies de rastreamento, não tem pixel de rede social e não usa
+            nenhuma ferramenta de analytics de terceiros.
+          </p>
+          <p>
+            Não medimos a sua navegação, não perfilamos visitantes e não exibimos banner de
+            consentimento porque não há rastreamento a consentir. As fontes, as imagens e os scripts
+            da página são servidos pelo próprio domínio do site.
+          </p>
+          <p>
+            O site usa apenas o armazenamento local do seu próprio navegador, em três itens, para
+            que a página se comporte do jeito que você escolheu:
+          </p>
+          <dl class="ppdl">
+            <div class="ppdl__row">
+              <dt><span class="ppkey">stratux:motion</span></dt>
+              <dd>
+                Guarda se você desligou as animações pelo botão do rodapé, para que a preferência
+                continue valendo nas próximas visitas.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt><span class="ppkey">stratux:perfil</span></dt>
+              <dd>
+                Guarda o perfil que você escolheu — pessoa física, MEI ou empresa — para a seção de
+                serviços continuar filtrada enquanto a aba estiver aberta.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt><span class="ppkey">stratux:diagnostico</span></dt>
+              <dd>
+                Guarda as quatro respostas do diagnóstico — situação, porte, funcionários e prazo —
+                para você não precisar responder de novo se voltar à seção enquanto a aba estiver
+                aberta. São apenas as opções marcadas, sem nome, telefone ou qualquer identificação.
+              </dd>
+            </div>
+          </dl>
+          <p>
+            Esses três itens ficam no seu aparelho, não identificam você, não são enviados para a
+            Stratux e não são compartilhados com ninguém. Os dois últimos são apagados sozinhos
+            quando você fecha a aba. Para apagar todos, basta limpar os dados do site nas
+            configurações do seu navegador — a única consequência é que o site volta ao
+            comportamento padrão.
+          </p>
+        </section>
+
+        <!-- 09 -------------------------------------------------------------- -->
+        <section class="ppsec" id="direitos" aria-labelledby="direitos-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="direitos-h">
+            <span class="ppsec__n num">09</span>Os seus direitos na LGPD
+          </h2>
+          <p>
+            O art. 18 da Lei nº 13.709/2018 garante a você, titular dos dados, os direitos abaixo.
+            Todos podem ser exercidos com a Stratux, de forma gratuita:
+          </p>
+          <ol class="ppdireitos">
+            {
+              direitos.map((d) => (
+                <li>
+                  <span class="ppdireitos__n num">{d.n}</span>
+                  <span class="ppdireitos__text">
+                    <strong>{d.title}</strong>
+                    <span>{d.text}</span>
+                  </span>
+                </li>
+              ))
+            }
+          </ol>
+          <p>
+            Além desses, você pode se opor a tratamento realizado com dispensa de consentimento, se
+            houver descumprimento da lei, e peticionar diretamente à Autoridade Nacional de Proteção
+            de Dados (ANPD), nos termos dos parágrafos do art. 18.
+          </p>
+        </section>
+
+        <!-- 10 -------------------------------------------------------------- -->
+        <section class="ppsec" id="exercicio" aria-labelledby="exercicio-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="exercicio-h">
+            <span class="ppsec__n num">10</span>Como exercer os seus direitos
+          </h2>
+          <p>
+            Enquanto a Stratux não publicar o e-mail do encarregado pelo tratamento de dados
+            pessoais (DPO), o canal oficial para qualquer pedido relativo aos seus dados — inclusive
+            confirmação, acesso, correção, eliminação e revogação do consentimento — é o telefone e
+            WhatsApp {contact.phoneLabel}.
+          </p>
+          <p>
+            Ao receber o pedido, confirmamos a sua identidade antes de responder, para não entregar
+            dado pessoal à pessoa errada, e respondemos no prazo previsto no art. 19 da LGPD. Quando
+            não for possível atender — por exemplo, quando a lei obrigar a conservar o documento —
+            explicamos o motivo por escrito.
+          </p>
+
+          {/* TODO cliente: revisão jurídica e e-mail do encarregado (DPO) */}
+          <div class="ppnote">
+            <Icon name="info" size={16} />
+            <div>
+              <p class="ppnote__t">Encarregado (DPO): a confirmar</p>
+              <p>
+                O e-mail do encarregado será publicado aqui assim que definido. Até lá, todo pedido
+                relativo a dados pessoais é recebido e registrado pelo telefone e WhatsApp acima,
+                sem prejuízo de nenhum dos direitos desta política.
+              </p>
+            </div>
+          </div>
+
+          <div class="ppcta cluster">
+            <a class="btn btn--gold" href={waRights} target="_blank" rel="noopener">
+              <Icon name="whatsapp" size={17} class="btn__ico" />
+              <span>Falar sobre os meus dados</span>
+            </a>
+            <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
+              <Icon name="phone" size={16} class="btn__ico" />
+              <span>{contact.phoneLabel}</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 11 -------------------------------------------------------------- -->
+        <section class="ppsec" id="terceiros" aria-labelledby="terceiros-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="terceiros-h">
+            <span class="ppsec__n num">11</span>Links e serviços de terceiros
+          </h2>
+          <p>
+            Os botões de WhatsApp deste site levam você para o aplicativo ou para o site do
+            WhatsApp, operado pela Meta, que tem política de privacidade própria. O mesmo vale para
+            os links de telefone, que acionam o discador do seu aparelho.
+          </p>
+          <p>
+            A partir do momento em que a conversa passa a acontecer nessas plataformas, o tratamento
+            dos dados também segue as regras delas, sobre as quais a Stratux não tem controle. O que
+            você nos enviar por lá continua protegido por esta política e pelo sigilo profissional.
+          </p>
+        </section>
+
+        <!-- 12 -------------------------------------------------------------- -->
+        <section class="ppsec" id="alteracoes" aria-labelledby="alteracoes-h" data-reveal>
+          <h2 class="h3 ppsec__h" id="alteracoes-h">
+            <span class="ppsec__n num">12</span>Alterações desta política
+          </h2>
+          <p>
+            Esta política pode ser atualizada quando houver mudança nos serviços, na tecnologia do
+            site ou na legislação aplicável. A versão vigente é sempre a publicada nesta página, e a
+            data de última atualização fica no topo e no rodapé do documento.
+          </p>
+          <p class="ppupdated">Última atualização: {updated}</p>
+          <p class="ppback">
+            <a href={home}>
+              <Icon name="arrow" size={16} />
+              <span>Voltar para o início do site</span>
+            </a>
+          </p>
+        </section>
+      </article>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- cabeçalho ---------- */
+  .pphead {
+    position: relative;
+    margin-top: -68px;
+    padding-top: calc(68px + clamp(2.5rem, 1.4rem + 5vw, 5rem));
+    padding-bottom: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    overflow: clip;
+  }
+  .pphead__inner {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+  .pphead__title {
+    max-width: 18ch;
+  }
+  .pphead__lead {
+    max-width: 62ch;
+  }
+  .pphead__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+    margin-top: var(--s-1);
+  }
+  .pphead__meta li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+  }
+  .pphead__meta :global(svg) {
+    flex: none;
+    color: var(--accent);
+  }
+
+  /* ---------- sumário ---------- */
+  .ppdoc {
+    background: var(--bg);
+  }
+  .pptoc {
+    padding: clamp(1.25rem, 0.9rem + 1.2vw, 1.9rem);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    margin-bottom: clamp(2.5rem, 1.8rem + 2.5vw, 4rem);
+  }
+  .pptoc__h {
+    margin-bottom: var(--s-4);
+  }
+  .pptoc__list {
+    display: grid;
+    gap: 0;
+  }
+  .pptoc__list li + li {
+    border-top: 1px solid var(--line);
+  }
+  .pptoc__list a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    padding: 0.52rem 0;
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .pptoc__list a:hover {
+    color: var(--accent);
+  }
+  .pptoc__n {
+    flex: none;
+    width: 1.75rem;
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+  .pptoc__list a:hover .pptoc__t {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ---------- corpo do documento ---------- */
+  .ppbody {
+    display: grid;
+    gap: clamp(2.25rem, 1.6rem + 2.4vw, 3.5rem);
+  }
+  .ppsec {
+    display: grid;
+    gap: var(--s-4);
+    scroll-margin-top: 6.5rem;
+  }
+  .ppsec__h {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .ppsec__n {
+    flex: none;
+    font-size: var(--fs-sm);
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .ppsec p {
+    color: var(--fg-soft);
+    line-height: 1.78;
+  }
+  .ppsec :global(strong) {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .ppsec .ppstrong {
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  /* listas */
+  .pplist {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .pplist li {
+    position: relative;
+    padding-left: 1.35rem;
+    color: var(--fg-soft);
+    line-height: 1.75;
+  }
+  .pplist li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.82em;
+    width: 8px;
+    height: 1px;
+    background: var(--accent-fill);
+  }
+
+  /* pares termo/definição */
+  .ppdl {
+    display: grid;
+    gap: var(--s-4);
+    padding: var(--s-5) 0;
+    border-block: 1px solid var(--line);
+  }
+  .ppdl__row {
+    display: grid;
+    gap: var(--s-1);
+  }
+  .ppdl dt {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .ppdl dd {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    color: var(--fg-mute);
+  }
+  .ppkey {
+    display: inline-block;
+    padding: 0.1rem 0.42rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    border-radius: var(--r-1);
+  }
+
+  /* cartão do controlador */
+  .ppcard {
+    display: grid;
+    gap: var(--s-3);
+    padding: clamp(1.1rem, 0.9rem + 0.9vw, 1.6rem);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent-fill);
+    border-radius: var(--r-2);
+  }
+  .ppcard .ppcard__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.3;
+  }
+  .ppcard__list {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .ppcard__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+    line-height: 1.6;
+  }
+  .ppcard__list :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+
+  /* direitos do art. 18 */
+  .ppdireitos {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .ppdireitos li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-4);
+  }
+  .ppdireitos__n {
+    flex: none;
+    min-width: 2.35rem;
+    padding-top: 0.15rem;
+    font-size: var(--fs-sm);
+    text-align: right;
+    color: var(--accent);
+  }
+  .ppdireitos__text {
+    display: grid;
+    gap: 2px;
+  }
+  .ppdireitos__text strong {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.45;
+  }
+  .ppdireitos__text span {
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    color: var(--fg-mute);
+  }
+
+  /* nota honesta de pendência */
+  .ppnote {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-4);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--fg) 3%, transparent);
+  }
+  .ppnote :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  .ppnote div {
+    display: grid;
+    gap: var(--s-1);
+  }
+  .ppnote p {
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--fg-mute);
+  }
+  .ppnote .ppnote__t {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .ppcta {
+    gap: var(--s-3);
+    margin-top: var(--s-2);
+  }
+
+  .ppsec .ppupdated {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .ppback a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .ppback a :global(svg) {
+    transition: transform var(--d-2) var(--e-out);
+  }
+  .ppback a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .ppback a:hover :global(svg) {
+    transform: translate(2px, -2px);
+  }
+
+  @media (min-width: 720px) {
+    .ppdl__row {
+      grid-template-columns: 11rem 1fr;
+      gap: var(--s-4);
+      align-items: baseline;
+    }
+  }
+</style>

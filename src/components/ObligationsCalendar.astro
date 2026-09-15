@@ -1,0 +1,820 @@
+---
+import Icon from '~/components/Icon.astro';
+import {
+  profiles,
+  monthlyObligations,
+  annualObligations,
+  wa,
+  type Obligation,
+} from '~/data/site';
+
+/**
+ * Calendário de obrigações — a seção que mostra domínio técnico sem discurso.
+ *
+ * Filtro por perfil sem JavaScript: radios reais + :has(), no mesmo padrão de
+ * ProfileServices.astro. Os ids usam o prefixo `obg-` e o grupo se chama
+ * `obg-perfil` para não colidir com o seletor de perfil daquela seção, já que
+ * as duas convivem na mesma página.
+ *
+ * A contagem regressiva é calculada no cliente a partir da data corrente, lendo
+ * as próprias obrigações já renderizadas. Sem JavaScript, o bloco mostra um
+ * texto neutro e as listas continuam completas.
+ */
+
+const gates = [
+  { id: 'todos', short: 'Tudo' },
+  ...profiles.map((p) => ({ id: p.id, short: p.short })),
+];
+
+const MESES_ABREV = [
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
+];
+
+/* Mensais agrupadas por dia e ordenadas pelo dia. */
+const porDia = new Map<number, Obligation[]>();
+for (const o of monthlyObligations) {
+  const atual = porDia.get(o.day);
+  if (atual) atual.push(o);
+  else porDia.set(o.day, [o]);
+}
+const gruposMensais = [...porDia.entries()]
+  .sort((a, b) => a[0] - b[0])
+  .map(([day, items]) => ({ day, items }));
+
+/* Anuais ordenadas pelo mês e, dentro do mês, pelo dia. */
+const anuais = [...annualObligations].sort(
+  (a, b) => (a.month ?? 0) - (b.month ?? 0) || a.day - b.day,
+);
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const ctaHref = wa(
+  'Olá! Vim pelo site da Stratux, vi o calendário de obrigações e quero acompanhamento dos meus vencimentos.',
+);
+---
+
+<section class="section obg on-navy navy-field" id="obrigacoes" aria-labelledby="obrigacoes-h">
+  <div class="obg__gate">
+    {/* Controles reais: sem JavaScript continuam filtrando. */}
+    <fieldset class="obg__inputs sr-only">
+      <legend>Filtrar as obrigações pelo seu perfil</legend>
+      {
+        gates.map((g, i) => (
+          <input type="radio" name="obg-perfil" id={`obg-${g.id}`} value={g.id} checked={i === 0} />
+        ))
+      }
+    </fieldset>
+
+    <div class="shell">
+      <div class="sechead">
+        <p class="kicker" data-reveal="fade">Calendário de obrigações</p>
+        <h2 class="h2" id="obrigacoes-h" data-split>
+          As datas que a sua rotina fiscal é obrigada a cumprir.
+        </h2>
+        <p class="lead" data-reveal style="--i:1">
+          O que vence todo mês e o que vence uma vez por ano, com quem é atingido por cada prazo.
+          Filtre pelo seu perfil e veja só o que obriga você.
+        </p>
+        <p class="obg__meta" data-reveal style="--i:2">
+          <span>
+            <span class="num" data-count={monthlyObligations.length}>{monthlyObligations.length}</span>
+            datas mensais
+          </span>
+          <span class="obg__metasep" aria-hidden="true"></span>
+          <span>
+            <span class="num" data-count={annualObligations.length}>{annualObligations.length}</span>
+            datas anuais
+          </span>
+        </p>
+      </div>
+
+      <!-- ---------------------- contagem regressiva ---------------------- -->
+      <div class="cd" data-reveal aria-live="polite">
+        <span class="cd__edge" aria-hidden="true"></span>
+
+        <p class="cd__kicker">
+          <span class="cd__pulse" aria-hidden="true"></span>
+          <span>Próximo vencimento</span>
+        </p>
+
+        <p class="cd__quiet" data-cd-quiet>
+          Consulte o próximo vencimento com a gente — o calendário completo está logo abaixo.
+        </p>
+
+        <div class="cd__live" data-cd-live hidden>
+          <p class="cd__big">
+            <span class="cd__count num" data-cd-count>—</span>
+            <span class="cd__unit" data-cd-unit></span>
+          </p>
+          <p class="cd__date" data-cd-date></p>
+          <ul class="cd__list" data-cd-list></ul>
+        </div>
+      </div>
+
+      <!-- ---------------------------- filtro ----------------------------- -->
+      <div class="obg__filterbar" data-reveal="fade">
+        <span class="obg__filterlabel">Exibindo:</span>
+        <div class="obg__chips" role="group" aria-label="Filtrar obrigações por perfil">
+          {
+            gates.map((g) => (
+              <label class="chip" for={`obg-${g.id}`} data-chip={g.id}>
+                {g.short}
+              </label>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- --------------------------- calendário -------------------------- -->
+      <div class="obg__cols">
+        <!-- mensais -->
+        <div class="cal">
+          <div class="cal__head" data-reveal="fade">
+            <span class="icobox">
+              <Icon name="calendar" size={21} />
+            </span>
+            <div>
+              <h3 class="h3">Todo mês</h3>
+              <p class="cal__sub">
+                O dia é a referência de vencimento. A regra de cada tributo ajusta quando ele cai em
+                fim de semana ou feriado.
+              </p>
+            </div>
+          </div>
+
+          <ul class="cal__body">
+            {
+              gruposMensais.map((g, i) => (
+                <li class="dayrow" data-reveal style={`--i:${Math.min(i, 4)}`}>
+                  <p class="dayrow__day">
+                    <span class="dayrow__num num">{pad(g.day)}</span>
+                    <span class="dayrow__word">dia</span>
+                  </p>
+
+                  <ul class="dayrow__items">
+                    {g.items.map((o) => (
+                      <li class="ob" data-ob data-day={o.day} data-profiles={o.profiles.join(' ')}>
+                        <p class="ob__head">
+                          <span class="ob__name" data-ob-name>
+                            {o.name}
+                          </span>
+                          <span class="ob__who" data-ob-who>
+                            {o.who}
+                          </span>
+                        </p>
+                        <p class="ob__note">{o.note}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))
+            }
+          </ul>
+
+          <p class="cal__empty" role="status">
+            Nenhuma obrigação mensal para esse perfil.
+            <label for="obg-todos">Ver o calendário inteiro</label>.
+          </p>
+        </div>
+
+        <!-- anuais -->
+        <div class="cal">
+          <div class="cal__head" data-reveal="fade">
+            <span class="icobox">
+              <Icon name="doc" size={21} />
+            </span>
+            <div>
+              <h3 class="h3">Uma vez por ano</h3>
+              <p class="cal__sub">
+                As entregas anuais, na ordem em que chegam ao longo do ano-calendário.
+              </p>
+            </div>
+          </div>
+
+          <ul class="cal__body">
+            {
+              anuais.map((o, i) => (
+                <li
+                  class="ann"
+                  data-profiles={o.profiles.join(' ')}
+                  data-reveal
+                  style={`--i:${Math.min(i, 4)}`}
+                >
+                  <p class="ann__date">
+                    <span class="ann__num num">{pad(o.day)}</span>
+                    <span class="ann__mon">{MESES_ABREV[(o.month ?? 1) - 1]}</span>
+                  </p>
+                  <div class="ann__body">
+                    <p class="ob__head">
+                      <span class="ob__name">{o.name}</span>
+                      <span class="ob__who">{o.who}</span>
+                    </p>
+                    <p class="ob__note">{o.note}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+
+          <p class="cal__empty" role="status">
+            Nenhuma obrigação anual para esse perfil.
+            <label for="obg-todos">Ver o calendário inteiro</label>.
+          </p>
+        </div>
+      </div>
+
+      <!-- --------------------------- ressalva ---------------------------- -->
+      <p class="disclaimer obg__note" data-reveal="fade">
+        <Icon name="info" size={16} />
+        <span>
+          Datas de referência. Vencimento em fim de semana ou feriado antecipa ou posterga conforme
+          a regra de cada tributo; ISS e ICMS variam por município e por estado. Confirme sempre com
+          a Stratux antes de recolher.
+        </span>
+      </p>
+
+      <!-- ------------------------------ CTA ------------------------------ -->
+      <div class="obg__cta" data-reveal>
+        <p class="obg__ctatext">
+          Nossos clientes recebem o aviso antes de cada vencimento, com o que precisamos de você
+          para fechar o prazo no dia.
+        </p>
+        <a class="btn btn--gold btn--lg magnetic" href={ctaHref} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={19} class="btn__ico" />
+          <span>Falar sobre o meu calendário</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var root = document.getElementById('obrigacoes');
+    if (!root) return;
+
+    var live = root.querySelector('[data-cd-live]');
+    var quiet = root.querySelector('[data-cd-quiet]');
+    var elCount = root.querySelector('[data-cd-count]');
+    var elUnit = root.querySelector('[data-cd-unit]');
+    var elDate = root.querySelector('[data-cd-date]');
+    var elList = root.querySelector('[data-cd-list]');
+    if (!live || !elCount || !elUnit || !elDate || !elList) return;
+
+    var MESES = [
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
+    ];
+
+    /* Lê as obrigações já renderizadas — nenhum dado duplicado no script. */
+    var obs = Array.prototype.slice
+      .call(root.querySelectorAll('[data-ob]'))
+      .map(function (el) {
+        var n = el.querySelector('[data-ob-name]');
+        var w = el.querySelector('[data-ob-who]');
+        return {
+          day: parseInt(el.getAttribute('data-day'), 10),
+          profiles: (el.getAttribute('data-profiles') || '').split(/\s+/),
+          name: n ? (n.textContent || '').trim() : '',
+          who: w ? (w.textContent || '').trim() : '',
+        };
+      })
+      .filter(function (o) {
+        return o.day > 0;
+      });
+
+    if (!obs.length) return;
+
+    function lastDayOf(y, m) {
+      return new Date(y, m + 1, 0).getDate();
+    }
+
+    function activeProfile() {
+      var r = root.querySelector('input[name="obg-perfil"]:checked');
+      return r && r.value !== 'todos' ? r.value : null;
+    }
+
+    function quietOnly() {
+      live.hidden = true;
+      if (quiet) quiet.hidden = false;
+      root.removeAttribute('data-cd-state');
+    }
+
+    function render() {
+      var prof = activeProfile();
+      var pool = obs.filter(function (o) {
+        return !prof || o.profiles.indexOf(prof) > -1;
+      });
+      if (!pool.length) return quietOnly();
+
+      var agora = new Date();
+      var hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+      var alvo = null;
+
+      /* Mês corrente; se tudo já passou, o primeiro vencimento do mês seguinte. */
+      for (var k = 0; k < 2 && !alvo; k++) {
+        var probe = new Date(hoje.getFullYear(), hoje.getMonth() + k, 1);
+        var y = probe.getFullYear();
+        var m = probe.getMonth();
+        var dim = lastDayOf(y, m);
+
+        var dias = [];
+        for (var j = 0; j < pool.length; j++) {
+          /* Dia 30 em mês curto vira o último dia do mês. */
+          var eff = Math.min(pool[j].day, dim);
+          if (dias.indexOf(eff) < 0) dias.push(eff);
+        }
+        dias.sort(function (a, b) {
+          return a - b;
+        });
+
+        for (var i = 0; i < dias.length; i++) {
+          var data = new Date(y, m, dias[i]);
+          if (data.getTime() >= hoje.getTime()) {
+            alvo = { data: data, dia: dias[i], dim: dim };
+            break;
+          }
+        }
+      }
+      if (!alvo) return quietOnly();
+
+      var faltam = Math.round((alvo.data.getTime() - hoje.getTime()) / 86400000);
+      if (faltam <= 0) {
+        elCount.textContent = 'Hoje';
+        elUnit.textContent = 'é o dia do vencimento';
+      } else if (faltam === 1) {
+        elCount.textContent = '1';
+        elUnit.textContent = 'dia para o vencimento';
+      } else {
+        elCount.textContent = String(faltam);
+        elUnit.textContent = 'dias para o vencimento';
+      }
+      root.setAttribute('data-cd-state', faltam <= 0 ? 'hoje' : 'futuro');
+
+      elDate.textContent = 'Dia ' + alvo.dia + ' de ' + MESES[alvo.data.getMonth()];
+
+      while (elList.firstChild) elList.removeChild(elList.firstChild);
+      pool.forEach(function (o) {
+        if (Math.min(o.day, alvo.dim) !== alvo.dia) return;
+        var li = document.createElement('li');
+        var nome = document.createElement('span');
+        nome.className = 'cd__name';
+        nome.textContent = o.name;
+        var quem = document.createElement('span');
+        quem.className = 'cd__who';
+        quem.textContent = o.who;
+        li.appendChild(nome);
+        li.appendChild(quem);
+        elList.appendChild(li);
+      });
+
+      if (quiet) quiet.hidden = true;
+      live.hidden = false;
+    }
+
+    render();
+
+    Array.prototype.forEach.call(
+      root.querySelectorAll('input[name="obg-perfil"]'),
+      function (r) {
+        r.addEventListener('change', render);
+      },
+    );
+  })();
+</script>
+
+<style>
+  /* ---------- filtro sem JavaScript ---------- */
+  .obg__inputs {
+    border: 0;
+    padding: 0;
+  }
+
+  .obg:has(#obg-pf:checked) [data-profiles]:not([data-profiles~='pf']),
+  .obg:has(#obg-mei:checked) [data-profiles]:not([data-profiles~='mei']),
+  .obg:has(#obg-empresa:checked) [data-profiles]:not([data-profiles~='empresa']) {
+    display: none;
+  }
+
+  /* Grupo de dia sem nenhum item visível some inteiro. */
+  .obg:has(#obg-pf:checked) .dayrow:not(:has([data-profiles~='pf'])),
+  .obg:has(#obg-mei:checked) .dayrow:not(:has([data-profiles~='mei'])),
+  .obg:has(#obg-empresa:checked) .dayrow:not(:has([data-profiles~='empresa'])) {
+    display: none;
+  }
+
+  /* Chip marcado. */
+  .obg:has(#obg-todos:checked) .chip[data-chip='todos'],
+  .obg:has(#obg-pf:checked) .chip[data-chip='pf'],
+  .obg:has(#obg-mei:checked) .chip[data-chip='mei'],
+  .obg:has(#obg-empresa:checked) .chip[data-chip='empresa'] {
+    background: var(--accent-fill);
+    border-color: var(--accent-fill);
+    color: var(--navy-950);
+  }
+
+  /* O foco de teclado do radio aparece no rótulo correspondente. */
+  .obg:has(#obg-todos:focus-visible) .chip[data-chip='todos'],
+  .obg:has(#obg-pf:focus-visible) .chip[data-chip='pf'],
+  .obg:has(#obg-mei:focus-visible) .chip[data-chip='mei'],
+  .obg:has(#obg-empresa:focus-visible) .chip[data-chip='empresa'] {
+    outline: 2px solid var(--gold-400);
+    outline-offset: 3px;
+  }
+
+  /* ---------- cabeçalho ---------- */
+  .obg__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+  }
+  .obg__meta .num {
+    color: var(--accent);
+    margin-right: 0.15em;
+  }
+  .obg__metasep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  /* ---------- contagem regressiva ---------- */
+  .cd {
+    position: relative;
+    overflow: hidden;
+    margin-top: var(--s-2);
+    padding: clamp(1.4rem, 1rem + 1.6vw, 2.2rem);
+    background: color-mix(in srgb, var(--navy-950) 55%, transparent);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    box-shadow: var(--sh-navy);
+    transition: border-color var(--d-3) var(--e-out);
+  }
+  .cd__edge {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-fill), transparent 70%);
+    transform-origin: 0 50%;
+    animation: cdEdge var(--d-5) var(--e-out) 0.15s both;
+  }
+  @keyframes cdEdge {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
+  .obg[data-cd-state='hoje'] .cd {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+
+  .cd__kicker {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cd__pulse {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: cdPulse 2.6s var(--e-soft) infinite;
+  }
+  @keyframes cdPulse {
+    0%,
+    100% {
+      opacity: 0.32;
+      transform: scale(0.7);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .cd__quiet {
+    margin-top: var(--s-4);
+    max-width: 48ch;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--fg-soft);
+  }
+
+  .cd__live {
+    margin-top: var(--s-4);
+    display: grid;
+    gap: var(--s-2);
+  }
+  .cd__big {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-2) var(--s-4);
+  }
+  .cd__count {
+    font-size: clamp(2.6rem, 1.6rem + 4vw, 4.2rem);
+    line-height: 0.95;
+    color: var(--accent);
+  }
+  .cd__unit {
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    color: var(--fg-soft);
+  }
+  .cd__date {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--fg-mute);
+  }
+  .cd__list {
+    display: grid;
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  /* Estes três nós nascem em JavaScript e não recebem o atributo de escopo do
+     Astro — por isso precisam de :global() para o CSS alcançá-los. */
+  .cd__list :global(li) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem var(--s-3);
+  }
+  .cd__list :global(.cd__name) {
+    font-size: var(--fs-body);
+    font-weight: 600;
+  }
+  .cd__list :global(.cd__who) {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+
+  /* ---------- barra de filtro ---------- */
+  .obg__filterbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-7);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .obg__filterlabel {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .obg__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .chip {
+    padding: 0.42rem 0.9rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-soft);
+    background: color-mix(in srgb, var(--navy-950) 45%, transparent);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition:
+      background var(--d-2) var(--e-out),
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ---------- colunas ---------- */
+  .obg__cols {
+    display: grid;
+    gap: var(--s-8);
+    margin-top: var(--s-6);
+    align-items: start;
+  }
+  .cal {
+    min-width: 0;
+  }
+  .cal__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-4);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .cal__sub {
+    margin-top: 0.35rem;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg-mute);
+  }
+  .cal__body {
+    display: grid;
+  }
+
+  /* ---------- linha de dia (mensais) ---------- */
+  .dayrow {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s-4);
+    padding-block: var(--s-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .dayrow__day,
+  .ann__date {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 1px;
+    min-width: 3.5rem;
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--navy-950) 45%, transparent);
+  }
+  .dayrow__num,
+  .ann__num {
+    font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.65rem);
+    line-height: 1.05;
+    color: var(--accent);
+  }
+  .dayrow__word,
+  .ann__mon {
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+
+  /* Espinha que agrupa visualmente as obrigações do mesmo dia. */
+  .dayrow__items {
+    position: relative;
+    display: grid;
+    gap: var(--s-5);
+    padding-left: var(--s-5);
+    min-width: 0;
+  }
+  .dayrow__items::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    bottom: 0.4em;
+    width: 1px;
+    background: linear-gradient(var(--accent-fill), transparent);
+    opacity: 0.55;
+  }
+  .ob {
+    position: relative;
+    min-width: 0;
+  }
+  .ob::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--s-5) * -1);
+    top: 0.62em;
+    width: var(--s-3);
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .ob__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem var(--s-3);
+  }
+  .ob__name {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .ob__who {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .ob__note {
+    margin-top: 0.3rem;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg-mute);
+  }
+
+  /* ---------- anuais ---------- */
+  .ann {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s-4);
+    padding-block: var(--s-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .ann__body {
+    min-width: 0;
+  }
+
+  /* ---------- estado vazio ---------- */
+  .cal__empty {
+    display: none;
+    margin-top: var(--s-5);
+    padding: var(--s-5);
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-3);
+  }
+  .cal__empty label {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .obg:has(#obg-pf:checked) .cal:not(:has([data-profiles~='pf'])) .cal__empty,
+  .obg:has(#obg-mei:checked) .cal:not(:has([data-profiles~='mei'])) .cal__empty,
+  .obg:has(#obg-empresa:checked) .cal:not(:has([data-profiles~='empresa'])) .cal__empty {
+    display: block;
+  }
+
+  /* ---------- ressalva e CTA ---------- */
+  .obg__note {
+    margin-top: var(--s-7);
+  }
+  .obg__cta {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+    margin-top: var(--s-7);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .obg__ctatext {
+    max-width: 54ch;
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--fg-soft);
+  }
+
+  @media (min-width: 720px) {
+    .cd__live {
+      gap: var(--s-3);
+    }
+    .obg__cta {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--s-6);
+    }
+  }
+  @media (min-width: 1000px) {
+    .obg__cols {
+      grid-template-columns: 1.15fr 1fr;
+      gap: var(--s-9);
+    }
+  }
+</style>

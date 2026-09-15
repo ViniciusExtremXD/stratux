@@ -1,0 +1,207 @@
+---
+import Icon from '~/components/Icon.astro';
+import { brand, contact, legal, regions, serviceAreas } from '~/data/site';
+
+/**
+ * Faixa de credibilidade — plinto navy logo abaixo do hero.
+ *
+ * Regra da peça: nenhum número é digitado à mão. Tudo o que aparece aqui é
+ * contado a partir de `src/data/site.ts`, então o dia em que uma praça ou um
+ * serviço entrar no arquivo, a faixa se corrige sozinha.
+ */
+const totalServicos = serviceAreas.reduce((soma, area) => soma + area.items.length, 0);
+
+/** "Respondemos em até 1 dia útil." → 1 */
+const diasResposta = Number(contact.responseTime.match(/\d+/)?.[0] ?? 1);
+
+const matriz = regions.find((r) => r.role === 'Matriz') ?? regions[0];
+
+type Stat = { value: number; label: string; note: string; icon: string };
+
+const stats: Stat[] = [
+  {
+    value: regions.length,
+    label: 'praças de atendimento',
+    note: regions.map((r) => r.city).join(' · '),
+    icon: 'pin',
+  },
+  {
+    value: serviceAreas.length,
+    label: 'áreas de atuação',
+    note: serviceAreas.map((a) => a.shortTitle).join(' · '),
+    icon: 'ledger',
+  },
+  {
+    value: totalServicos,
+    label: 'serviços no portfólio',
+    note: 'Do imposto de renda à folha de pagamento, descritos um a um.',
+    icon: 'doc',
+  },
+  {
+    value: diasResposta,
+    label: diasResposta === 1 ? 'dia útil para responder' : 'dias úteis para responder',
+    note: 'Prazo máximo de retorno ao primeiro contato.',
+    icon: 'clock',
+  },
+];
+---
+
+<section
+  class="cred on-navy navy-field section section--tight"
+  id="credibilidade"
+  aria-labelledby="credibilidade-h"
+>
+  <div class="shell">
+    <h2 class="kicker cred__head" id="credibilidade-h" data-reveal="fade">A Stratux em números</h2>
+
+    <ul class="cred__grid">
+      {
+        stats.map((s, i) => (
+          <li class="cred__item" data-reveal style={`--i:${i}`}>
+            <span class="cred__rule" aria-hidden="true" />
+            <span class="num cred__num" data-count={s.value}>
+              {s.value}
+            </span>
+            <p class="cred__label">
+              <Icon name={s.icon} size={15} />
+              <span>{s.label}</span>
+            </p>
+            <p class="cred__note">{s.note}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* TODO cliente: anos de atuação, nº de clientes, CRC do responsável técnico */}
+
+    <div class="cred__legal" data-reveal="fade" style="--i:4">
+      <span class="cred__shield" aria-hidden="true">
+        <Icon name="shield" size={18} />
+      </span>
+      <p class="cred__legaltext">
+        <span class="cred__legalname">{brand.legalName}</span>
+        <span class="cred__dot" aria-hidden="true">·</span>
+        <span>CNPJ {brand.cnpj}</span>
+        <span class="cred__dot" aria-hidden="true">·</span>
+        <span>{matriz.role}: {matriz.detail}</span>
+        <span class="cred__dot" aria-hidden="true">·</span>
+        <span>CEP {legal.address.zip}</span>
+        {
+          legal.crc && (
+            <>
+              <span class="cred__dot" aria-hidden="true">
+                ·
+              </span>
+              <span>{legal.crc}</span>
+            </>
+          )
+        }
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Plinto: um degrau mais escuro que o hero, separado por fio de 1px. */
+  .cred {
+    --bg: var(--navy-950);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cred__head {
+    margin-bottom: clamp(1.5rem, 1rem + 1.7vw, 2.35rem);
+  }
+
+  .cred__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1.6rem, 1rem + 2.2vw, 2.6rem) clamp(1.15rem, 0.7rem + 1.8vw, 2.6rem);
+  }
+
+  .cred__item {
+    position: relative;
+    display: grid;
+    gap: var(--s-2);
+    align-content: start;
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+
+  /* Pontuação dourada: fio curto sobre o fio neutro, como marcação de livro-razão. */
+  .cred__rule {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: clamp(26px, 18%, 44px);
+    height: 1px;
+    background: var(--accent-fill);
+  }
+
+  .cred__num {
+    display: block;
+    font-size: clamp(2.35rem, 1.5rem + 3vw, 3.45rem);
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .cred__label {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--fg);
+  }
+  .cred__label :global(svg) {
+    flex: none;
+    color: var(--accent);
+  }
+
+  .cred__note {
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--fg-mute);
+    max-width: 32ch;
+  }
+
+  /* ---------- identificação legal ---------- */
+  .cred__legal {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-3);
+    margin-top: clamp(1.9rem, 1.2rem + 2.2vw, 2.9rem);
+    padding-top: clamp(1.15rem, 0.9rem + 1vw, 1.7rem);
+    border-top: 1px solid var(--line);
+  }
+  .cred__shield {
+    flex: none;
+    display: grid;
+    place-items: center;
+    margin-top: 1px;
+    color: var(--accent);
+  }
+  .cred__legaltext {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-2);
+    font-size: var(--fs-xs);
+    line-height: 1.65;
+    color: var(--fg-mute);
+  }
+  .cred__legalname {
+    color: var(--fg-soft);
+    font-weight: 600;
+    letter-spacing: 0.015em;
+  }
+  .cred__dot {
+    color: var(--line-strong);
+  }
+
+  @media (min-width: 760px) {
+    .cred__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

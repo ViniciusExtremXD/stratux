@@ -470,8 +470,13 @@ export const annualObligations: Obligation[] = [
    ATUALIZAR A CADA ANO-CALENDÁRIO.
    ========================================================================= */
 export const taxRef = {
-  year: 2025,
-  /** Salário mínimo usado no cálculo do DAS-SIMEI. */
+  /** Ano-calendário a que os parâmetros abaixo se referem. */
+  year: 2026,
+  /**
+   * Salário mínimo usado no cálculo do DAS-SIMEI.
+   * ATENÇÃO: valor de 2025. Nenhum componente renderiza este número hoje —
+   * confirme o valor vigente antes de usá-lo em qualquer lugar visível.
+   */
   minimumWage: 1518,
   /** Teto de faturamento do MEI no ano. */
   meiLimit: 81000,
@@ -609,7 +614,7 @@ export const faq = [
 ] as const;
 
 export const disclaimerText =
-  'Estimativa gerada a partir das tabelas vigentes e dos valores informados por você. Não considera particularidades de CNAE, benefícios fiscais, substituição tributária, ICMS interestadual nem créditos. Não substitui a análise de um contador.';
+  'Estimativa gerada a partir dos anexos da LC 123/2006, das alíquotas vigentes do Lucro Presumido e dos valores informados por você. Não considera particularidades de CNAE, benefícios fiscais, substituição tributária, ICMS interestadual, créditos, nem a transição da reforma tributária. Não substitui a análise de um contador.';
 
 export const seo = {
   title: 'Stratux Consultoria Empresarial — Contabilidade em São Paulo',

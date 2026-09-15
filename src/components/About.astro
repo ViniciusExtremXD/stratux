@@ -1,0 +1,523 @@
+---
+import Icon from '~/components/Icon.astro';
+import { brand, legal, mission, vision, values, wa } from '~/data/site';
+
+/**
+ * Sobre — missão, visão e valores em tratamento editorial, mais a ficha
+ * institucional. Responsável técnico e CRC só aparecem quando existirem em
+ * site.ts; enquanto forem null, o bloco mostra um placeholder honesto.
+ */
+const addr = legal.address;
+const technicalLead: string | null = legal.technicalLead;
+const crc: string | null = legal.crc;
+const hasCredentials = technicalLead !== null || crc !== null;
+
+const initials = technicalLead
+  ? technicalLead
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w.charAt(0))
+      .join('')
+      .toUpperCase()
+  : '';
+
+const waCrc = wa(
+  'Olá! Vim pelo site da Stratux e gostaria de saber quem é o responsável técnico e o número de registro no CRC.',
+);
+
+const lastValue = values.length - 1;
+---
+
+<section class="section sobre" id="sobre" aria-labelledby="sobre-h">
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Sobre a Stratux</p>
+      <h2 class="h2" id="sobre-h" data-split>Quem somos e o que nos orienta.</h2>
+      <p class="lead" data-reveal style="--i:1">{brand.intro}</p>
+    </div>
+
+    <!-- ------------------------- MISSÃO E VISÃO ------------------------- -->
+    <div class="mv">
+      <article class="mv__block" aria-labelledby="sobre-missao" data-reveal style="--i:0">
+        <span class="mv__bar" aria-hidden="true"></span>
+        <div class="mv__head">
+          <h3 class="kicker kicker--bare mv__label" id="sobre-missao">Missão</h3>
+          <svg class="mv__mark" viewBox="0 0 48 48" fill="none" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="19" stroke="currentColor" stroke-width="1" opacity="0.45" />
+            <circle cx="24" cy="24" r="11" stroke="currentColor" stroke-width="1" opacity="0.7" />
+            <circle cx="24" cy="24" r="3" fill="var(--accent-fill)" />
+            <path
+              d="M24 2v7M24 39v7M2 24h7M39 24h7"
+              stroke="currentColor"
+              stroke-width="1"
+              stroke-linecap="round"
+              opacity="0.45"
+            />
+          </svg>
+        </div>
+        <p class="mv__text">{mission}</p>
+      </article>
+
+      <article class="mv__block" aria-labelledby="sobre-visao" data-reveal style="--i:1">
+        <span class="mv__bar" aria-hidden="true"></span>
+        <div class="mv__head">
+          <h3 class="kicker kicker--bare mv__label" id="sobre-visao">Visão</h3>
+          <svg class="mv__mark" viewBox="0 0 48 48" fill="none" aria-hidden="true" focusable="false">
+            <path d="M12 34a12 12 0 0 1 24 0" stroke="var(--accent-fill)" stroke-width="1.35" fill="none" />
+            <path d="M3 34h42" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6" />
+            <path
+              d="M24 5v6M10.2 11.2l4.2 4.2M37.8 11.2l-4.2 4.2M2 27h6M40 27h6"
+              stroke="currentColor"
+              stroke-width="1"
+              stroke-linecap="round"
+              opacity="0.45"
+            />
+          </svg>
+        </div>
+        <p class="mv__text">{vision}</p>
+      </article>
+    </div>
+
+    <hr class="rule rule--gold sobre__div" data-reveal="fade" />
+
+    <!-- ----------------------------- VALORES ---------------------------- -->
+    <div class="vals">
+      <div class="vals__head" data-reveal>
+        <h3 class="h3">Valores que sustentam o trabalho</h3>
+        <p class="small mute">
+          Sete princípios que orientam o atendimento, o cumprimento de prazos e a forma como
+          tratamos a informação de cada cliente.
+        </p>
+      </div>
+
+      <ul class="vals__grid">
+        {
+          values.map((v, i) => (
+            <li class={i === lastValue ? 'val val--wide' : 'val'} data-reveal style={`--i:${i % 3}`}>
+              <span class="val__tick" aria-hidden="true" />
+              <span class="icobox">
+                <Icon name={v.icon} size={21} />
+              </span>
+              <h4 class="h4 val__title">{v.title}</h4>
+              <p class="val__text">{v.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- ------------------------- EQUIPE / FICHA ------------------------- -->
+    {/* TODO cliente: foto, nome, formação e CRC do responsável técnico */}
+    <div class="team" data-reveal>
+      <div class="team__card">
+        <span class="team__corner team__corner--h" aria-hidden="true"></span>
+        <span class="team__corner team__corner--v" aria-hidden="true"></span>
+
+        <div class="team__portrait">
+          {
+            hasCredentials ? (
+              <span class="team__mono" aria-hidden="true">
+                {initials || brand.name.charAt(0)}
+              </span>
+            ) : (
+              <span class="team__slot">
+                <Icon name="user" size={38} />
+                <span class="team__slotlabel">Foto a publicar</span>
+              </span>
+            )
+          }
+        </div>
+
+        <div class="team__body">
+          <p class="kicker">Transparência</p>
+          <h3 class="h3 team__title">Responsável técnico e registro no CRC</h3>
+          <p class="team__note">
+            O CRC é o registro no Conselho Regional de Contabilidade — é ele que habilita um
+            profissional a assinar a escrituração e as demonstrações contábeis de uma empresa.
+          </p>
+
+          <dl class="ficha">
+            <div class="ficha__row">
+              <dt>Razão social</dt>
+              <dd>{brand.legalName}</dd>
+            </div>
+            <div class="ficha__row">
+              <dt>CNPJ</dt>
+              <dd class="num">{brand.cnpj}</dd>
+            </div>
+            <div class="ficha__row">
+              <dt>Sede</dt>
+              <dd>{addr.street} — {addr.city}/{addr.state}</dd>
+            </div>
+            <div class="ficha__row">
+              <dt>Responsável técnico</dt>
+              <dd>{technicalLead ?? <span class="badge">A publicar</span>}</dd>
+            </div>
+            <div class="ficha__row">
+              <dt>Registro no CRC</dt>
+              <dd>{crc ?? <span class="badge">A publicar</span>}</dd>
+            </div>
+          </dl>
+
+          {
+            !hasCredentials && (
+              <p class="team__pending">
+                Nome, formação e número de registro do profissional que assina tecnicamente os
+                serviços ainda não estão publicados aqui. Preferimos deixar o campo em branco a
+                publicar um dado que você não possa conferir — e você pode pedi-los agora mesmo.
+              </p>
+            )
+          }
+
+          {
+            !hasCredentials && (
+              <a class="team__cta" href={waCrc} target="_blank" rel="noopener">
+                <Icon name="whatsapp" size={15} />
+                <span>Pedir os dados do responsável técnico</span>
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sobre {
+    background: var(--bg-raised);
+    border-block: 1px solid var(--line);
+  }
+
+  /* ------------------------- missão e visão ------------------------- */
+  .mv {
+    display: grid;
+    gap: clamp(2.75rem, 1.8rem + 3.2vw, 4rem);
+  }
+  .mv__block {
+    position: relative;
+    padding-top: var(--s-6);
+    max-width: 58ch;
+  }
+  .mv__bar {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-fill), transparent 84%);
+    transform-origin: 0 50%;
+    animation: mvBar var(--d-5) var(--e-out) 0.12s both;
+  }
+  @keyframes mvBar {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .mv__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-5);
+  }
+  .mv__label {
+    color: var(--accent);
+  }
+  .mv__mark {
+    flex: none;
+    width: clamp(38px, 8vw, 48px);
+    height: auto;
+    color: var(--silver-400);
+    opacity: 0.85;
+    animation: mvMark var(--d-5) var(--e-out) 0.28s both;
+  }
+  @keyframes mvMark {
+    from {
+      opacity: 0;
+      transform: rotate(-10deg) scale(0.86);
+    }
+    to {
+      opacity: 0.85;
+      transform: none;
+    }
+  }
+  .mv__text {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.08rem, 0.99rem + 0.52vw, 1.34rem);
+    line-height: 1.62;
+    color: var(--fg);
+  }
+  .mv__text::first-letter {
+    float: left;
+    margin: 0.04em 0.1em 0 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 3em;
+    line-height: 0.82;
+    color: var(--accent);
+  }
+
+  .sobre__div {
+    margin-block: clamp(3rem, 2rem + 3.6vw, 5rem);
+  }
+
+  /* ----------------------------- valores ---------------------------- */
+  .vals__head {
+    display: grid;
+    gap: var(--s-3);
+    max-width: 58ch;
+    margin-bottom: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+  }
+  .vals__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+  .val {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--s-4);
+    row-gap: var(--s-2);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .val__tick {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--accent-fill);
+    transform-origin: 0 50%;
+    animation: valTick var(--d-4) var(--e-out) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 0.1s);
+  }
+  @keyframes valTick {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .val .icobox {
+    grid-row: span 2;
+  }
+  .val__title {
+    align-self: center;
+  }
+  .val__text {
+    grid-column: 2;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--fg-mute);
+  }
+
+  /* --------------------------- ficha / equipe ----------------------- */
+  .team {
+    margin-top: clamp(3rem, 2rem + 3.6vw, 5rem);
+  }
+  .team__card {
+    position: relative;
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    padding: clamp(1.4rem, 1rem + 1.8vw, 2.25rem);
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-3);
+    overflow: hidden;
+  }
+  .team__corner {
+    position: absolute;
+    background: var(--accent-fill);
+    transform-origin: 0 0;
+  }
+  .team__corner--h {
+    inset: 0 auto auto 0;
+    width: 72px;
+    height: 2px;
+    animation: cornerH var(--d-4) var(--e-out) 0.15s both;
+  }
+  .team__corner--v {
+    inset: 0 auto auto 0;
+    width: 2px;
+    height: 72px;
+    animation: cornerV var(--d-4) var(--e-out) 0.25s both;
+  }
+  @keyframes cornerH {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes cornerV {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .team__portrait {
+    display: grid;
+    place-items: center;
+    width: clamp(124px, 38vw, 172px);
+    max-width: 100%;
+    aspect-ratio: 3 / 4;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-2);
+    background: linear-gradient(160deg, var(--bg-raised), var(--bone-dim));
+    color: var(--silver-400);
+  }
+  .team__slot {
+    display: grid;
+    justify-items: center;
+    gap: var(--s-2);
+    text-align: center;
+    padding-inline: var(--s-2);
+  }
+  .team__slotlabel {
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+    color: var(--fg-mute);
+  }
+  .team__mono {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 1.4rem + 2.4vw, 2.9rem);
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+
+  .team__title {
+    margin-top: var(--s-3);
+  }
+  .team__note {
+    margin-top: var(--s-3);
+    max-width: 62ch;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--fg-mute);
+  }
+
+  .ficha {
+    margin-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .ficha__row {
+    display: grid;
+    gap: 2px;
+    padding-block: var(--s-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .ficha dt {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.5;
+    color: var(--fg-mute);
+  }
+  .ficha dd {
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg);
+  }
+
+  .team__pending {
+    margin-top: var(--s-5);
+    padding-left: var(--s-4);
+    max-width: 66ch;
+    border-left: 2px solid var(--accent-fill);
+    font-size: var(--fs-sm);
+    line-height: 1.62;
+    color: var(--fg-soft);
+  }
+  .team__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--s-5);
+    padding: 0.6rem 1rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      background var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .team__cta :global(svg) {
+    flex: none;
+    color: var(--accent);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .team__cta:hover {
+    background: var(--navy-900);
+    border-color: var(--navy-900);
+    color: var(--silver-100);
+  }
+  .team__cta:hover :global(svg) {
+    color: var(--gold-400);
+  }
+
+  /* --------------------------- breakpoints -------------------------- */
+  @media (min-width: 720px) {
+    .vals__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-6);
+    }
+    .val--wide {
+      grid-column: 1 / -1;
+    }
+    .val--wide .val__text {
+      max-width: 72ch;
+    }
+    .ficha__row {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      align-items: baseline;
+      gap: var(--s-4);
+    }
+  }
+
+  @media (min-width: 760px) {
+    .team__card {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: clamp(2rem, 1.2rem + 2.4vw, 3rem);
+      padding: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .mv {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(3rem, 1.5rem + 3.4vw, 4.5rem);
+    }
+    .mv__block + .mv__block {
+      padding-left: clamp(2rem, 1rem + 2.4vw, 3.25rem);
+      border-left: 1px solid var(--line);
+    }
+    .mv__block + .mv__block .mv__bar {
+      left: clamp(2rem, 1rem + 2.4vw, 3.25rem);
+    }
+  }
+
+  @media (min-width: 1020px) {
+    .vals__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--s-7) var(--s-6);
+    }
+  }
+</style>

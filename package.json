@@ -9,7 +9,10 @@
     "preview": "astro preview",
     "check": "astro check",
     "verify": "node scripts-verify/verify.mjs",
-    "verify:all": "node scripts-verify/verify.mjs --pages /,/politica-de-privacidade,/404"
+    "verify:all": "node scripts-verify/verify.mjs --pages /,/politica-de-privacidade,/404",
+    "verify:calc": "node scripts-verify/calc-test.mjs",
+    "verify:interact": "node scripts-verify/interact.mjs",
+    "shots": "node scripts-verify/shots.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2",

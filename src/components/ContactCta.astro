@@ -1,0 +1,686 @@
+---
+import Icon from '~/components/Icon.astro';
+import { contact, processSteps, profiles, serviceAreas, waDefault } from '~/data/site';
+
+/**
+ * CTA final. Última seção antes do rodapé.
+ *
+ * O destino do lead ainda não foi definido pelo cliente, então o formulário
+ * não finge ter um endpoint: sem JavaScript ele se declara em configuração e
+ * entrega WhatsApp e telefone como canais imediatos; com JavaScript ele monta
+ * uma mensagem estruturada e abre a conversa no WhatsApp.
+ */
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const privacyHref = `${base}/politica-de-privacidade`;
+
+const diag = processSteps[0];
+const subjects = [...serviceAreas.map((a) => a.shortTitle), 'Outro'];
+---
+
+<section class="cta section on-navy navy-field" id="contato" aria-labelledby="contato-h">
+  <div class="shell shell--wide">
+    <div class="cta__grid">
+      <!-- ---------------------------- CONVITE ---------------------------- -->
+      <div class="cta__copy">
+        <p class="kicker" data-reveal="fade">Contato</p>
+
+        <h2 class="h2 cta__title" id="contato-h" data-split>
+          Comece por um diagnóstico, não por uma proposta.
+        </h2>
+
+        <p class="lead cta__lead" data-reveal style="--i:1">{diag.text}</p>
+
+        <p class="cta__free" data-reveal style="--i:2">
+          <span class="badge badge--gold">
+            <Icon name="check" size={13} />
+            <span>{diag.title} sem custo</span>
+          </span>
+          <span class="cta__freetxt">
+            Apresentamos o valor fechado antes de qualquer contratação.
+          </span>
+        </p>
+
+        <div class="cta__sla" data-reveal style="--i:3">
+          <span class="icobox">
+            <Icon name="clock" size={21} />
+          </span>
+          <span class="cta__slatext">
+            <span class="cta__slak">Prazo de resposta</span>
+            <strong class="cta__slav">{contact.responseTime}</strong>
+          </span>
+        </div>
+
+        <div class="cta__channels cluster" data-reveal style="--i:4">
+          <a class="btn btn--gold magnetic" href={waDefault} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={18} class="btn__ico" />
+            <span>Falar no WhatsApp</span>
+          </a>
+          <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
+            <Icon name="phone" size={16} class="btn__ico" />
+            <span>{contact.phoneLabel}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- --------------------------- FORMULÁRIO --------------------------- -->
+      <div class="cta__panel" data-reveal="right" style="--i:1">
+        {/* TODO cliente: definir destino do lead (e-mail comercial, CRM ou webhook) e trocar o handler de submit */}
+
+        {/*
+          `method="dialog"` sem <dialog> em volta é o freio de mão do envio: o
+          navegador dispara o evento submit e aborta a navegação. Garante que,
+          enquanto não houver destino definido, nenhum dado do visitante possa
+          acabar na barra de endereço — nem se o JavaScript falhar, nem se um dos
+          campos de texto for removido daqui no futuro.
+        */}
+        <form
+          class="form card"
+          id="contato-form"
+          method="dialog"
+          novalidate
+          data-wa={contact.whatsappNumber}
+        >
+          <span class="card__rule" aria-hidden="true"></span>
+
+          <div class="form__head">
+            <h3 class="h4 form__title">Conte o seu caso</h3>
+            <p class="form__sub">
+              Quanto mais específico, mais útil é a primeira resposta. Nada aqui compromete você.
+            </p>
+          </div>
+
+          <div class="form__grid">
+            <div class="field">
+              <label for="ct-nome">
+                Nome <span class="field__req" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="input"
+                id="ct-nome"
+                name="nome"
+                type="text"
+                autocomplete="name"
+                data-label="Nome"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="ct-tel">
+                Telefone ou WhatsApp <span class="field__req" aria-hidden="true">*</span>
+              </label>
+              <input
+                class="input"
+                id="ct-tel"
+                name="telefone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="(11) 90000-0000"
+                data-label="Telefone ou WhatsApp"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="ct-email">E-mail</label>
+              <input
+                class="input"
+                id="ct-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                data-label="E-mail"
+              />
+            </div>
+
+            <div class="field">
+              <label for="ct-perfil">Perfil</label>
+              <select class="select" id="ct-perfil" name="perfil" data-label="Perfil">
+                <option value="">Selecione</option>
+                {profiles.map((p) => <option value={p.short}>{p.short}</option>)}
+              </select>
+            </div>
+
+            <div class="field field--wide">
+              <label for="ct-assunto">Assunto</label>
+              <select class="select" id="ct-assunto" name="assunto" data-label="Assunto">
+                <option value="">Selecione</option>
+                {subjects.map((s) => <option value={s}>{s}</option>)}
+              </select>
+            </div>
+
+            <div class="field field--wide">
+              <label for="ct-msg">Mensagem</label>
+              <textarea
+                class="textarea"
+                id="ct-msg"
+                name="mensagem"
+                rows="4"
+                data-label="Mensagem"
+                placeholder="Regime atual, o que está pendente, qual é o prazo."></textarea>
+            </div>
+          </div>
+
+          <div class="consent">
+            <input class="consent__box" id="ct-lgpd" name="consentimento" type="checkbox" required />
+            <label for="ct-lgpd">
+              Autorizo a Stratux a usar meu nome, telefone e e-mail com a única finalidade de
+              responder a este contato. Li a <a href={privacyHref}>política de privacidade</a>.
+              <span class="field__req" aria-hidden="true">*</span>
+            </label>
+          </div>
+
+          <div class="form__msg" data-msg aria-hidden="true">
+            <span class="form__msgico form__msgico--err"><Icon name="alert" size={16} /></span>
+            <span class="form__msgico form__msgico--ok"><Icon name="check" size={16} /></span>
+            <span data-msg-text></span>
+          </div>
+          <p class="sr-only" role="alert" data-msg-live></p>
+
+          <a class="form__fallback" data-wa-fallback href={waDefault} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={15} />
+            <span>Abrir a conversa no WhatsApp</span>
+          </a>
+
+          <div class="form__foot">
+            <button
+              class="btn btn--gold btn--lg btn--block"
+              type="button"
+              data-submit
+              aria-disabled="true"
+              aria-describedby="form-destino"
+            >
+              <Icon name="whatsapp" size={18} class="btn__ico" />
+              <span>Enviar pelo WhatsApp</span>
+            </button>
+
+            {/* Sem JavaScript este bloco é a única mensagem — por isso ele é o padrão do HTML. */}
+            <p class="form__nojs" id="form-destino">
+              <Icon name="info" size={15} />
+              <span>
+                O envio direto pelo site ainda está sendo configurado. Este botão precisa de
+                JavaScript para montar a mensagem. Enquanto isso, fale agora pelo <a
+                  href={waDefault}
+                  target="_blank"
+                  rel="noopener">WhatsApp</a
+                > ou ligue para <a href={`tel:${contact.phoneE164}`}>{contact.phoneLabel}</a>.
+              </span>
+            </p>
+
+            <p class="form__jsnote" id="form-jsnote">
+              <Icon name="info" size={15} />
+              <span>
+                Ao enviar, abrimos uma conversa no WhatsApp já preenchida com o que você escreveu —
+                você confere e envia.
+              </span>
+            </p>
+          </div>
+        </form>
+
+        <p class="cta__lgpd">
+          <Icon name="lock" size={15} />
+          <span>
+            Finalidade declarada: os dados deste formulário são usados apenas para responder ao seu
+            contato. Nenhum outro uso sem o seu consentimento. Detalhes na <a href={privacyHref}
+              >política de privacidade</a
+            >.
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    /* =====================================================================
+       TODO cliente: definir destino do lead (e-mail comercial, CRM ou
+       webhook) e trocar o handler de submit abaixo.
+       Enquanto isso, o submit monta uma mensagem estruturada e abre o
+       WhatsApp. Sem JavaScript, o formulario assume o estado declarado no
+       HTML: botao inerte + WhatsApp e telefone como canais imediatos.
+       ===================================================================== */
+    var form = document.getElementById('contato-form');
+    if (!form) return;
+
+    var btn = form.querySelector('[data-submit]');
+    var box = form.querySelector('[data-msg]');
+    var boxText = form.querySelector('[data-msg-text]');
+    var live = form.querySelector('[data-msg-live]');
+    var fallback = form.querySelector('[data-wa-fallback]');
+
+    /* liga o modo com JavaScript antes da primeira pintura */
+    form.setAttribute('data-js', '1');
+    if (btn) {
+      btn.type = 'submit';
+      btn.removeAttribute('aria-disabled');
+      btn.setAttribute('aria-describedby', 'form-jsnote');
+    }
+
+    function say(text, ok) {
+      if (boxText) boxText.textContent = text;
+      if (box) {
+        box.classList.add('is-on');
+        box.classList.toggle('is-ok', !!ok);
+      }
+      if (live) live.textContent = text;
+    }
+
+    function clearMsg() {
+      if (box) box.classList.remove('is-on', 'is-ok');
+      if (boxText) boxText.textContent = '';
+      if (live) live.textContent = '';
+      if (fallback) fallback.classList.remove('is-on');
+    }
+
+    form.addEventListener('input', function (ev) {
+      var t = ev.target;
+      if (t && t.removeAttribute) t.removeAttribute('aria-invalid');
+      clearMsg();
+    });
+    form.addEventListener('change', function (ev) {
+      var t = ev.target;
+      if (t && t.removeAttribute) t.removeAttribute('aria-invalid');
+      clearMsg();
+    });
+
+    function labelOf(el) {
+      return el.getAttribute('data-label') || el.name || 'campo';
+    }
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+
+      var missing = [];
+      var first = null;
+      var consentOff = false;
+
+      Array.prototype.forEach.call(form.querySelectorAll('[required]'), function (el) {
+        var bad = el.type === 'checkbox' ? !el.checked : String(el.value || '').trim() === '';
+        if (!bad) return;
+        el.setAttribute('aria-invalid', 'true');
+        if (!first) first = el;
+        if (el.type === 'checkbox') consentOff = true;
+        else missing.push(labelOf(el));
+      });
+
+      var email = form.querySelector('#ct-email');
+      var emailBad = false;
+      if (email && email.value.trim() !== '' && email.validity && email.validity.typeMismatch) {
+        emailBad = true;
+        email.setAttribute('aria-invalid', 'true');
+        if (!first) first = email;
+      }
+
+      if (missing.length || consentOff || emailBad) {
+        var parts = [];
+        if (missing.length) parts.push('Preencha: ' + missing.join(', ') + '.');
+        if (emailBad) parts.push('Confira o e-mail informado.');
+        if (consentOff) parts.push('Marque a autorização de uso dos dados para continuar.');
+        say(parts.join(' '), false);
+        if (first && first.focus) first.focus();
+        return;
+      }
+
+      /* mensagem estruturada com os campos preenchidos */
+      var head = [];
+      var tail = [];
+      Array.prototype.forEach.call(form.querySelectorAll('[data-label]'), function (el) {
+        var v = String(el.value || '').trim();
+        if (!v) return;
+        if (el.tagName === 'TEXTAREA') {
+          tail.push(labelOf(el) + ':');
+          tail.push(v);
+        } else {
+          head.push(labelOf(el) + ': ' + v);
+        }
+      });
+
+      var lines = ['Olá! Vim pelo site da Stratux e gostaria de falar com um contador.', ''];
+      lines = lines.concat(head);
+      if (tail.length) lines = lines.concat(['']).concat(tail);
+
+      var url =
+        'https://wa.me/' +
+        form.getAttribute('data-wa') +
+        '?text=' +
+        encodeURIComponent(lines.join('\n'));
+
+      if (fallback) fallback.href = url;
+
+      var win = window.open(url, '_blank', 'noopener');
+      if (win) {
+        say(
+          'Tudo certo. Abrimos o WhatsApp com os seus dados — é só conferir e enviar na conversa.',
+          true,
+        );
+      } else {
+        say('O navegador bloqueou a abertura automática. Use o link abaixo para abrir a conversa.', false);
+        if (fallback) fallback.classList.add('is-on');
+      }
+    });
+  })();
+</script>
+
+<style>
+  .cta {
+    --err: color-mix(in srgb, var(--danger) 45%, var(--silver-200));
+    --ok: color-mix(in srgb, var(--success) 40%, var(--silver-100));
+    border-top: 1px solid var(--line);
+  }
+
+  .cta__grid {
+    display: grid;
+    gap: clamp(2.5rem, 1.2rem + 5vw, 4.5rem);
+    align-items: start;
+  }
+  .cta__grid > * {
+    min-width: 0;
+  }
+
+  /* ---------- convite ---------- */
+  .cta__copy {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+    justify-items: start;
+  }
+  .cta__title {
+    max-width: 16ch;
+  }
+  .cta__lead {
+    max-width: 46ch;
+  }
+
+  .cta__free {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    max-width: 44ch;
+  }
+  .cta__freetxt {
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    line-height: 1.55;
+  }
+
+  .cta__sla {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    width: 100%;
+    max-width: 30rem;
+    padding: var(--s-4);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent-fill);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--navy-950) 42%, transparent);
+  }
+  .cta__slatext {
+    display: grid;
+    gap: 2px;
+  }
+  .cta__slak {
+    font-size: var(--fs-kicker);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .cta__slav {
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--fg);
+  }
+
+  .cta__channels {
+    gap: var(--s-4);
+  }
+
+  /* ---------- painel do formulário ---------- */
+  .cta__panel {
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .form {
+    display: grid;
+    gap: var(--s-5);
+    background: var(--navy-850);
+    border-color: var(--line-strong);
+    box-shadow: var(--sh-navy);
+  }
+  .form .card__rule {
+    opacity: 1;
+  }
+
+  .form__head {
+    display: grid;
+    gap: var(--s-2);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .form__sub {
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+    line-height: 1.55;
+  }
+
+  .form__grid {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .field__req {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .form .input,
+  .form .select,
+  .form .textarea {
+    background: var(--navy-800);
+  }
+  .form [aria-invalid='true'] {
+    border-color: var(--err);
+  }
+
+  /* ---------- consentimento ---------- */
+  .consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3);
+    align-items: start;
+    padding: var(--s-4);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--navy-950) 42%, transparent);
+  }
+  .consent__box {
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+    accent-color: var(--accent-fill);
+    flex: none;
+  }
+  .consent label {
+    font-size: var(--fs-xs);
+    line-height: 1.65;
+    color: var(--fg-soft);
+  }
+  .consent a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .consent a:hover {
+    color: var(--gold-300);
+  }
+  .consent:has(.consent__box[aria-invalid='true']) {
+    border-color: var(--err);
+  }
+
+  /* ---------- mensagens do formulário ---------- */
+  .form__msg {
+    display: none;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-4);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--err);
+    border: 1px solid var(--err);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--navy-950) 42%, transparent);
+  }
+  .form__msg.is-on {
+    display: flex;
+    animation: msgIn var(--d-3) var(--e-out) both;
+  }
+  .form__msg.is-ok {
+    color: var(--ok);
+    border-color: color-mix(in srgb, var(--ok) 55%, transparent);
+  }
+  @keyframes msgIn {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 8px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .form__msgico {
+    display: grid;
+    flex: none;
+    margin-top: 2px;
+  }
+  .form__msgico--ok,
+  .form__msg.is-ok .form__msgico--err {
+    display: none;
+  }
+  .form__msg.is-ok .form__msgico--ok {
+    display: grid;
+  }
+
+  .form__fallback {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    padding: 0.6rem 1rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .form__fallback.is-on {
+    display: inline-flex;
+  }
+  .form__fallback :global(svg) {
+    color: var(--accent);
+  }
+  .form__fallback:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ---------- rodapé do formulário ---------- */
+  .form__foot {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .form [data-submit][aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .form [data-submit][aria-disabled='true']:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .form__nojs,
+  .form__jsnote {
+    gap: var(--s-3);
+    align-items: flex-start;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--fg-mute);
+  }
+  .form__nojs {
+    display: flex;
+    padding: var(--s-4);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--navy-950) 42%, transparent);
+  }
+  .form__nojs :global(svg),
+  .form__jsnote :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  .form__nojs a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .form__jsnote {
+    display: none;
+  }
+  /* estado com JavaScript: a nota de configuração dá lugar à explicação do envio */
+  .form[data-js='1'] .form__nojs {
+    display: none;
+  }
+  .form[data-js='1'] .form__jsnote {
+    display: flex;
+  }
+
+  /* ---------- nota LGPD ---------- */
+  .cta__lgpd {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding-inline: var(--s-1);
+    font-size: var(--fs-xs);
+    line-height: 1.65;
+    color: var(--fg-mute);
+  }
+  .cta__lgpd :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  .cta__lgpd a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ---------- responsivo ---------- */
+  @media (min-width: 600px) {
+    .form__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .form__grid > .field--wide {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 980px) {
+    .cta__grid {
+      grid-template-columns: 0.92fr 1.08fr;
+    }
+    .cta__copy {
+      position: sticky;
+      top: 6.5rem;
+    }
+  }
+</style>

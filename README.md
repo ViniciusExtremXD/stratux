@@ -90,16 +90,20 @@ de virar.
 
 `src/data/site.ts` → `taxRef`:
 
-| Campo          | Valor de referência | Quando revisar                  |
-| -------------- | ------------------- | ------------------------------- |
-| `year`         | 2025                | todo ano-calendário             |
-| `minimumWage`  | R$ 1.518            | reajuste do salário mínimo      |
-| `meiLimit`     | R$ 81.000           | mudança de teto do MEI          |
-| `simplesLimit` | R$ 4.800.000        | mudança de teto do Simples      |
+| Campo          | Valor        | Estado                                              |
+| -------------- | ------------ | --------------------------------------------------- |
+| `year`         | 2026         | rótulo exibido na calculadora                       |
+| `minimumWage`  | R$ 1.518     | **valor de 2025 — confirmar.** Não é renderizado hoje |
+| `meiLimit`     | R$ 81.000    | não é renderizado hoje                              |
+| `simplesLimit` | R$ 4.800.000 | usado para barrar o comparativo acima do teto       |
 
 As tabelas do Simples (`simplesTables`) e os percentuais do Lucro Presumido
-(`presumido`) seguem a LC 123/2006 e a legislação vigente — revisar a cada
-alteração legislativa. O ano aparece no rodapé da calculadora.
+(`presumido`) reproduzem os anexos da LC 123/2006 e as alíquotas vigentes do
+Lucro Presumido — legislação estável, revisar a cada alteração. A calculadora
+foi conferida contra cálculo manual em `scripts-verify/calc-test.mjs`.
+
+A calculadora **não** considera a transição da reforma tributária (EC 132/2023).
+Isso está declarado no aviso exibido ao usuário.
 
 ## Pendências com o cliente
 

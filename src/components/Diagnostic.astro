@@ -1,0 +1,793 @@
+---
+import Icon from '~/components/Icon.astro';
+import { contact, diagnostic, waDefault } from '~/data/site';
+
+/**
+ * Diagnóstico em quatro perguntas.
+ *
+ * Base sem JavaScript: são radios reais (um grupo por pergunta) + `:has()`.
+ * As quatro perguntas ficam visíveis o tempo todo; o painel de resultado troca
+ * de estado quando os quatro grupos estão respondidos, e a recomendação certa é
+ * escolhida por seletor — situação define o encaminhamento, porte, folha e
+ * prazo acrescentam a sua linha. O contador "x de 4" é um contador CSS
+ * alimentado por `:has()`, por isso também funciona sem script.
+ *
+ * O JavaScript é só conveniência: monta o link do WhatsApp com o contexto já
+ * escrito, resume as respostas em uma linha, anuncia o progresso para leitores
+ * de tela, guarda as escolhas na sessão e liga o botão de recomeçar. Sem ele, o
+ * botão continua levando à conversa com a mensagem padrão.
+ *
+ * Os ids das opções (`diag-<pergunta>-<opção>`) vêm de `diagnostic.steps` e
+ * estão espelhados nos seletores do <style>. Mexer nas opções em site.ts pede
+ * revisão dos dois blocos marcados lá embaixo.
+ */
+
+/** Rótulo curto de cada pergunta — usado no resumo e na mensagem do WhatsApp. */
+const fieldLabel: Record<string, string> = {
+  situacao: 'Situação',
+  porte: 'Porte',
+  folha: 'Funcionários',
+  urgencia: 'Prazo',
+};
+
+/** Regra base: a situação define o encaminhamento e os três primeiros passos. */
+type Rec = { id: string; title: string; text: string; steps: string[] };
+
+const recs: Rec[] = [
+  {
+    id: 'abrir',
+    title: 'Abertura com o regime decidido antes do protocolo',
+    text: 'A ordem importa. Atividade (CNAE), tipo societário e regime tributário precisam ser resolvidos antes de registrar: CNAE errado trava alvará e emissão de nota, e regime escolhido no automático costuma cobrar a conta já no primeiro ano. A análise vem antes da abertura, não depois.',
+    steps: [
+      'Consulta de viabilidade da atividade e do endereço na prefeitura',
+      'Comparativo entre Simples Nacional, Lucro Presumido e Lucro Real com os seus números',
+      'Junta Comercial, CNPJ, inscrições, certificado digital e alvará',
+    ],
+  },
+  {
+    id: 'trocar',
+    title: 'Migração de escritório sem interromper a operação',
+    text: 'A troca acontece em paralelo. Pedimos arquivos e acessos ao escritório anterior, conferimos o que está entregue, o que está em atraso e o que foi feito de forma arriscada — e só então assumimos a rotina. De sua parte ficam a procuração eletrônica e o distrato do contrato antigo.',
+    steps: [
+      'Levantamento do que está pendente antes de assumir a rotina',
+      'Transferência de procuração eletrônica, certificado digital e acessos',
+      'Calendário de obrigações fechado para o primeiro mês de virada',
+    ],
+  },
+  {
+    id: 'regularizar',
+    title: 'Passivo levantado antes de qualquer parcelamento',
+    text: 'Parcelar sem entender o débito é o erro mais comum. Parte relevante do que aparece em cobrança não é imposto devido: é declaração entregue errada, em duplicidade ou fora do prazo. Primeiro separamos uma coisa da outra, depois escolhemos a via de regularização.',
+    steps: [
+      'Extração completa dos débitos no e-CAC e nos demais órgãos',
+      'Separação entre imposto realmente devido e erro de declaração',
+      'Escolha da via: retificação, denúncia espontânea ou parcelamento',
+    ],
+  },
+  {
+    id: 'irpf',
+    title: 'Declaração conferida antes de transmitir, malha desfeita com documento',
+    text: 'A malha fina quase sempre nasce de divergência entre o que você declarou e o que fontes pagadoras, bancos e corretoras informaram à Receita. Conferimos os informes linha a linha antes de transmitir; se a declaração já está retida, montamos a retificação com o documento que sustenta cada valor.',
+    steps: [
+      'Conferência dos informes de rendimento, bens, dívidas e deduções',
+      'Transmissão da declaração ou retificação da que ficou retida',
+      'Acompanhamento do processamento e das exigências no e-CAC',
+    ],
+  },
+];
+
+/** Modulação: porte, folha e prazo dizem o que muda dentro do encaminhamento. */
+type Note = { id: string; icon: string; text: string };
+
+const notes: Note[] = [
+  {
+    id: 'porte-pf',
+    icon: 'user',
+    text: 'Como pessoa física, o trabalho se concentra no CPF: informes, deduções, bens e ganho de capital. Não há obrigação acessória de empresa a cumprir.',
+  },
+  {
+    id: 'porte-mei',
+    icon: 'sprout',
+    text: 'No MEI a rotina gira em torno do DAS mensal e do faturamento acumulado no ano — é o acumulado que diz se o limite será ultrapassado e quando a migração precisa começar a ser preparada.',
+  },
+  {
+    id: 'porte-pequena',
+    icon: 'building',
+    text: 'Nessa faixa o Simples Nacional costuma estar na mesa, mas a conta muda conforme o anexo e a proporção entre folha e faturamento. O comparativo entre regimes vem antes de qualquer conclusão.',
+  },
+  {
+    id: 'porte-media',
+    icon: 'chart',
+    text: 'Acima desse limite o Simples Nacional deixa de ser opção: a escolha passa a ser entre Lucro Presumido e Lucro Real, e depende da margem real da operação e do volume de créditos.',
+  },
+  {
+    id: 'folha-nenhum',
+    icon: 'user',
+    text: 'Sem empregado registrado, as rotinas trabalhistas mensais não se aplicam agora — mas pró-labore, retirada de sócio e contribuição previdenciária continuam exigindo tratamento correto.',
+  },
+  {
+    id: 'folha-ate5',
+    icon: 'people',
+    text: 'Com folha ativa, eSocial, FGTS e DCTFWeb entram no calendário todo mês, somados a férias, décimo terceiro e rescisões quando acontecem.',
+  },
+  {
+    id: 'folha-mais5',
+    icon: 'people',
+    text: 'Com mais de cinco registrados a folha pesa no enquadramento: no Simples Nacional, a proporção entre folha e faturamento (o fator R) pode mudar o anexo aplicado e, com ele, a alíquota.',
+  },
+  {
+    id: 'folha-contratar',
+    icon: 'spark',
+    text: 'Como a contratação está no horizonte, vale decidir o regime já considerando o custo da folha: admitir antes ou depois do enquadramento muda a conta e a data do primeiro eSocial.',
+  },
+  {
+    id: 'urgencia-agora',
+    icon: 'bolt',
+    text: 'Com prazo correndo, o primeiro movimento é identificar a data-limite de cada pendência e o que pode ser protocolado de imediato. Começamos pelo vencimento mais próximo.',
+  },
+  {
+    id: 'urgencia-mes',
+    icon: 'calendar',
+    text: 'Para começar ainda neste mês, reunir documentos e acessos logo é o que destrava o resto — boa parte das obrigações tem vencimento fixo no calendário e não espera.',
+  },
+  {
+    id: 'urgencia-planejando',
+    icon: 'search',
+    text: 'Em fase de planejamento dá para comparar cenários com calma. É o melhor momento para decidir regime, estrutura societária e composição do pró-labore, antes de a operação começar.',
+  },
+];
+
+/** Mensagem do WhatsApp montada pelo script — o miolo vem das respostas. */
+const waConfig = {
+  number: contact.whatsappNumber,
+  intro: 'Olá! Fiz o diagnóstico no site da Stratux e este é o meu caso:',
+  outro: 'Gostaria de falar sobre o próximo passo.',
+};
+---
+
+<section class="diag section on-navy navy-field" id="diagnostico" aria-labelledby="diag-h">
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Diagnóstico</p>
+      <h2 class="h2" id="diag-h" data-split>Quatro perguntas, um próximo passo claro.</h2>
+      <p class="lead" data-reveal style="--i:1">
+        Responda o que se aplica ao seu caso e o encaminhamento aparece aqui embaixo, junto de um
+        resumo pronto para abrir a conversa. Sem formulário, sem cadastro, sem e-mail.
+      </p>
+    </div>
+
+    <div class="diag__steps">
+      {
+        diagnostic.steps.map((step, i) => (
+          <div
+            class="q card"
+            role="radiogroup"
+            aria-labelledby={`diag-q-${step.id}`}
+            data-q={step.id}
+            data-field={fieldLabel[step.id] ?? step.id}
+            data-reveal
+            style={`--i:${i % 2}`}
+          >
+            <p class="q__head">
+              <span class="q__num num" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span class="q__text h4" id={`diag-q-${step.id}`}>
+                {step.question}
+              </span>
+            </p>
+
+            <div class="q__opts">
+              {step.options.map((o) => (
+                <label class="opt">
+                  <input
+                    class="opt__radio"
+                    type="radio"
+                    name={`diag-${step.id}`}
+                    id={`diag-${step.id}-${o.id}`}
+                    value={o.id}
+                    data-label={o.label}
+                  />
+                  <Icon name={o.icon} size={17} class="opt__ico" />
+                  <span class="opt__label">{o.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="diag__outcome" data-reveal style="--i:1">
+      <div class="out card">
+        <div class="out__head">
+          <span class="out__pips" aria-hidden="true">
+            <span class="pip pip--situacao"></span>
+            <span class="pip pip--porte"></span>
+            <span class="pip pip--folha"></span>
+            <span class="pip pip--urgencia"></span>
+          </span>
+          <span class="out__count num" aria-hidden="true"></span>
+          <span class="sr-only" role="status" data-diag-live>
+            Nenhuma das quatro perguntas foi respondida.
+          </span>
+
+          <button class="out__reset" type="button" data-diag-reset>
+            <Icon name="close" size={13} />
+            <span>Recomeçar</span>
+          </button>
+        </div>
+
+        <div class="out__body">
+          <p class="out__pending">
+            <Icon name="info" size={17} />
+            <span>
+              Responda as quatro perguntas acima. A recomendação para o seu caso aparece aqui, com
+              os primeiros passos e o resumo pronto para enviar.
+              <a class="out__pendinglink" href={waDefault} target="_blank" rel="noopener">
+                Prefere falar direto? Chame no WhatsApp.
+              </a>
+            </span>
+          </p>
+
+          <div class="out__result">
+            <div class="out__main">
+              <p class="kicker kicker--bare out__kicker">Seu próximo passo</p>
+              <p class="out__sum small" data-diag-sum></p>
+
+              {/* uma recomendação por situação — o :has() do <style> escolhe a visível */}
+              {
+                recs.map((r) => (
+                  <div class="rec" data-rec={r.id}>
+                    <h3 class="h3 rec__title">{r.title}</h3>
+                    <p class="rec__text">{r.text}</p>
+                    <ol class="rec__steps">
+                      {r.steps.map((s, n) => (
+                        <li class="rec__step">
+                          <span class="rec__stepnum num" aria-hidden="true">
+                            {n + 1}
+                          </span>
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                ))
+              }
+            </div>
+
+            <aside class="out__side">
+              <p class="out__sidehead h4">O que pesa no seu caso</p>
+
+              {/* uma linha por opção de porte, folha e prazo */}
+              <ul class="out__notes">
+                {
+                  notes.map((n) => (
+                    <li class="note" data-note={n.id}>
+                      <Icon name={n.icon} size={15} />
+                      <span>{n.text}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+
+              <a
+                class="btn btn--gold btn--block out__cta"
+                href={waDefault}
+                target="_blank"
+                rel="noopener"
+                data-diag-wa
+              >
+                <Icon name="whatsapp" size={18} class="btn__ico" />
+                <span>Enviar no WhatsApp com o meu contexto</span>
+              </a>
+
+              <p class="disclaimer out__note">
+                <Icon name="info" size={16} />
+                <span>
+                  Este diagnóstico é um encaminhamento inicial, montado a partir do que você
+                  respondeu. A definição de regime, de prazos e de valores depende da análise do seu
+                  caso por um contador.
+                </span>
+              </p>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" is:inline data-diag-config set:html={JSON.stringify(waConfig)} />
+</section>
+
+<script is:inline>
+  (function () {
+    var root = document.getElementById('diagnostico');
+    if (!root) return;
+
+    var cfg = {};
+    var cfgEl = root.querySelector('[data-diag-config]');
+    try {
+      cfg = JSON.parse((cfgEl && cfgEl.textContent) || '{}');
+    } catch (e) {
+      cfg = {};
+    }
+
+    var KEY = 'stratux:diagnostico';
+    var FIELDS = ['situacao', 'porte', 'folha', 'urgencia'];
+    var waLink = root.querySelector('[data-diag-wa]');
+    var sum = root.querySelector('[data-diag-sum]');
+    var live = root.querySelector('[data-diag-live]');
+    var resetBtn = root.querySelector('[data-diag-reset]');
+    var waFallback = waLink ? waLink.getAttribute('href') : '';
+
+    function picked(field) {
+      return root.querySelector('input[name="diag-' + field + '"]:checked');
+    }
+
+    function fieldName(field) {
+      var g = root.querySelector('[data-q="' + field + '"]');
+      return (g && g.getAttribute('data-field')) || field;
+    }
+
+    function update() {
+      var lines = [];
+      FIELDS.forEach(function (f) {
+        var el = picked(f);
+        if (!el) return;
+        lines.push(fieldName(f) + ': ' + (el.getAttribute('data-label') || el.value));
+      });
+
+      if (live) {
+        live.textContent =
+          lines.length === FIELDS.length
+            ? 'As quatro perguntas foram respondidas. A recomendação está logo abaixo.'
+            : lines.length + ' de ' + FIELDS.length + ' perguntas respondidas.';
+      }
+
+      if (lines.length < FIELDS.length) {
+        if (sum) sum.textContent = '';
+        if (waLink && waFallback) waLink.setAttribute('href', waFallback);
+        return;
+      }
+
+      if (sum) sum.textContent = lines.join(' · ');
+
+      if (waLink && cfg.number) {
+        var msg = cfg.intro + '\n\n' + lines.join('\n') + '\n\n' + cfg.outro;
+        waLink.setAttribute(
+          'href',
+          'https://wa.me/' + cfg.number + '?text=' + encodeURIComponent(msg),
+        );
+      }
+    }
+
+    function persist() {
+      try {
+        var data = {};
+        FIELDS.forEach(function (f) {
+          var el = picked(f);
+          if (el) data[f] = el.value;
+        });
+        sessionStorage.setItem(KEY, JSON.stringify(data));
+      } catch (e) {
+        /* modo privado: a escolha vale só para esta visita */
+      }
+    }
+
+    /* memória da sessão: quem volta não responde tudo de novo */
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(KEY) || '{}');
+      FIELDS.forEach(function (f) {
+        if (!saved[f]) return;
+        var el = root.querySelector('#diag-' + f + '-' + saved[f]);
+        if (el) el.checked = true;
+      });
+    } catch (e) {
+      /* silencioso: o diagnóstico começa vazio */
+    }
+
+    root.addEventListener('change', function (e) {
+      if (!e.target || e.target.type !== 'radio') return;
+      persist();
+      update();
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        root.querySelectorAll('input[type="radio"]').forEach(function (r) {
+          r.checked = false;
+        });
+        try {
+          sessionStorage.removeItem(KEY);
+        } catch (e) {}
+        update();
+        var first = root.querySelector('input[type="radio"]');
+        if (first) first.focus();
+      });
+    }
+
+    update();
+  })();
+</script>
+
+<style>
+  /* ---------- contador de progresso, sem JavaScript ---------- */
+  .diag {
+    counter-reset: diagDone;
+  }
+  .q:has(.opt__radio:checked) {
+    counter-increment: diagDone;
+  }
+  .out__count::after {
+    content: counter(diagDone) ' de 4 respondidas';
+  }
+
+  /* ---------- perguntas ---------- */
+  .diag__steps {
+    display: grid;
+    gap: var(--s-5);
+    grid-template-columns: 1fr;
+  }
+  .q {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+    min-width: 0;
+  }
+  .q:has(.opt__radio:checked) {
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  }
+  .q__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .q__num {
+    flex: none;
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    color: var(--fg-mute);
+    transition: color var(--d-3) var(--e-out);
+  }
+  .q:has(.opt__radio:checked) .q__num {
+    color: var(--accent);
+  }
+  .q__text {
+    min-width: 0;
+  }
+
+  .q__opts {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-width: 0;
+    padding: 0.62rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    cursor: pointer;
+    transition:
+      background var(--d-2) var(--e-out),
+      border-color var(--d-2) var(--e-out),
+      color var(--d-2) var(--e-out);
+  }
+  .opt:hover {
+    border-color: var(--line-strong);
+    background: color-mix(in srgb, var(--silver-100) 6%, transparent);
+  }
+  .opt:has(.opt__radio:checked) {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .opt:has(.opt__radio:focus-visible) {
+    border-color: var(--accent);
+  }
+
+  .opt__radio {
+    flex: none;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 17px;
+    height: 17px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 50%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    transition: border-color var(--d-2) var(--e-out);
+  }
+  .opt__radio:checked {
+    border-color: var(--accent);
+    background-image: radial-gradient(circle at 50% 50%, var(--accent) 0 3.6px, transparent 4.1px);
+  }
+
+  .opt :global(.opt__ico) {
+    flex: none;
+    color: var(--fg-mute);
+    transition: color var(--d-2) var(--e-out);
+  }
+  .opt:hover :global(.opt__ico),
+  .opt:has(.opt__radio:checked) :global(.opt__ico) {
+    color: var(--accent);
+  }
+  .opt__label {
+    min-width: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+    overflow-wrap: break-word;
+  }
+
+  /* ---------- painel de resultado ---------- */
+  .diag__outcome {
+    margin-top: var(--s-6);
+  }
+  .out {
+    display: grid;
+    gap: var(--s-5);
+    min-width: 0;
+    background: color-mix(in srgb, var(--navy-850) 88%, transparent);
+  }
+  .out__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-4);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .out__pips {
+    display: flex;
+    gap: 5px;
+  }
+  .pip {
+    width: clamp(22px, 6vw, 38px);
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--line-strong);
+    transition: background var(--d-3) var(--e-out);
+  }
+  /* espelha os grupos de diagnostic.steps */
+  .diag:has(input[name='diag-situacao']:checked) .pip--situacao,
+  .diag:has(input[name='diag-porte']:checked) .pip--porte,
+  .diag:has(input[name='diag-folha']:checked) .pip--folha,
+  .diag:has(input[name='diag-urgencia']:checked) .pip--urgencia {
+    background: var(--accent);
+  }
+  .out__count {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+
+  .out__reset {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    padding: 0.36rem 0.75rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-mute);
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    transition:
+      color var(--d-2) var(--e-out),
+      border-color var(--d-2) var(--e-out);
+  }
+  /* só aparece quando há script para limpar as respostas */
+  :global(html.js) .out__reset {
+    display: inline-flex;
+  }
+  .out__reset:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* pendente por padrão; resultado quando os quatro grupos respondem */
+  .out__body {
+    --pending-d: flex;
+    --result-d: grid;
+    --result-anim: none;
+    min-width: 0;
+  }
+  .out__pending {
+    display: var(--pending-d);
+    gap: var(--s-3);
+    align-items: flex-start;
+    max-width: 62ch;
+    font-size: var(--fs-sm);
+    color: var(--fg-soft);
+  }
+  .out__pending :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  .out__pendinglink {
+    display: inline-block;
+    margin-top: var(--s-2);
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    transition: border-color var(--d-2) var(--e-out);
+  }
+  .out__pendinglink:hover {
+    border-color: var(--accent);
+  }
+
+  .out__result {
+    display: none;
+    gap: var(--s-6);
+    grid-template-columns: 1fr;
+    min-width: 0;
+    animation-name: var(--result-anim, none);
+    animation-duration: var(--d-3);
+    animation-timing-function: var(--e-out);
+    animation-fill-mode: both;
+  }
+  .diag:has(input[name='diag-situacao']:checked):has(input[name='diag-porte']:checked):has(input[name='diag-folha']:checked):has(input[name='diag-urgencia']:checked)
+    .out__body {
+    --pending-d: none;
+    --result-anim: recIn;
+  }
+  .diag:has(input[name='diag-situacao']:checked):has(input[name='diag-porte']:checked):has(input[name='diag-folha']:checked):has(input[name='diag-urgencia']:checked)
+    .out__result {
+    display: var(--result-d);
+  }
+  @keyframes recIn {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .out__main {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+    min-width: 0;
+  }
+  .out__kicker {
+    color: var(--accent);
+  }
+  .out__sum {
+    color: var(--fg-mute);
+    line-height: 1.5;
+  }
+  .out__sum:empty {
+    display: none;
+  }
+
+  /* uma recomendação por situação */
+  .rec {
+    display: none;
+    gap: var(--s-4);
+    min-width: 0;
+  }
+  /* espelha as opções de situação em diagnostic.steps */
+  .diag:has(#diag-situacao-abrir:checked) .rec[data-rec='abrir'],
+  .diag:has(#diag-situacao-trocar:checked) .rec[data-rec='trocar'],
+  .diag:has(#diag-situacao-regularizar:checked) .rec[data-rec='regularizar'],
+  .diag:has(#diag-situacao-irpf:checked) .rec[data-rec='irpf'] {
+    display: grid;
+  }
+  .rec__title {
+    max-width: 26ch;
+  }
+  .rec__text {
+    max-width: 58ch;
+    color: var(--fg-soft);
+  }
+  .rec__steps {
+    display: grid;
+    gap: var(--s-3);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .rec__step {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    min-width: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg-soft);
+  }
+  .rec__stepnum {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    font-size: var(--fs-xs);
+    color: var(--navy-950);
+    background: var(--accent);
+    border-radius: var(--r-1);
+  }
+
+  /* ---------- coluna de apoio ---------- */
+  .out__side {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+    min-width: 0;
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .out__sidehead {
+    color: var(--fg);
+  }
+  .out__notes {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .note {
+    display: none;
+    gap: var(--s-3);
+    align-items: flex-start;
+    min-width: 0;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--fg-soft);
+  }
+  .note :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  /* espelha as opções de porte, folha e urgência em diagnostic.steps */
+  .diag:has(#diag-porte-pf:checked) .note[data-note='porte-pf'],
+  .diag:has(#diag-porte-mei:checked) .note[data-note='porte-mei'],
+  .diag:has(#diag-porte-pequena:checked) .note[data-note='porte-pequena'],
+  .diag:has(#diag-porte-media:checked) .note[data-note='porte-media'],
+  .diag:has(#diag-folha-nenhum:checked) .note[data-note='folha-nenhum'],
+  .diag:has(#diag-folha-ate5:checked) .note[data-note='folha-ate5'],
+  .diag:has(#diag-folha-mais5:checked) .note[data-note='folha-mais5'],
+  .diag:has(#diag-folha-contratar:checked) .note[data-note='folha-contratar'],
+  .diag:has(#diag-urgencia-agora:checked) .note[data-note='urgencia-agora'],
+  .diag:has(#diag-urgencia-mes:checked) .note[data-note='urgencia-mes'],
+  .diag:has(#diag-urgencia-planejando:checked) .note[data-note='urgencia-planejando'] {
+    display: flex;
+  }
+
+  .out__cta {
+    margin-top: var(--s-1);
+  }
+  .out__note {
+    background: color-mix(in srgb, var(--silver-100) 4%, transparent);
+  }
+
+  /* ---------- respiro ---------- */
+  @media (min-width: 760px) {
+    .diag__steps {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--s-5) var(--s-6);
+    }
+  }
+  @media (min-width: 1000px) {
+    .diag__outcome {
+      margin-top: var(--s-7);
+    }
+    .out__result {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    }
+    .out__side {
+      padding-top: 0;
+      padding-left: var(--s-6);
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>

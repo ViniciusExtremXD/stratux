@@ -1,0 +1,385 @@
+---
+import Base from '~/layouts/Base.astro';
+import Icon from '~/components/Icon.astro';
+import { brand, contact, wa } from '~/data/site';
+
+/**
+ * 404 — endereço inexistente.
+ * Tom sóbrio: reconhece o erro, explica em uma linha e devolve o visitante
+ * para os destinos que resolvem quase toda visita perdida.
+ */
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const home = base || '/';
+
+const rotas = [
+  { label: 'Início', hint: 'Voltar para a página inicial.', href: home, icon: 'arrow' },
+  {
+    label: 'Serviços',
+    hint: 'Tudo o que executamos, filtrado pelo seu perfil.',
+    href: `${base}/#servicos`,
+    icon: 'ledger',
+  },
+  {
+    label: 'Calculadora',
+    hint: 'Uma estimativa com as tabelas vigentes.',
+    href: `${base}/#calculadora`,
+    icon: 'calculator',
+  },
+  {
+    label: 'Obrigações',
+    hint: 'O calendário de prazos do mês e do ano.',
+    href: `${base}/#obrigacoes`,
+    icon: 'calendar',
+  },
+  {
+    label: 'Contato',
+    hint: 'Telefone, WhatsApp e formulário.',
+    href: `${base}/#contato`,
+    icon: 'phone',
+  },
+];
+
+const waMsg = wa(
+  'Olá! Cheguei a um endereço que não existe no site da Stratux e gostaria de falar com um contador.',
+);
+
+const title = `Página não encontrada — ${brand.full}`;
+const description =
+  'O endereço acessado não existe no site da Stratux. Veja os caminhos para serviços, calculadora, calendário de obrigações e contato.';
+---
+
+<Base title={title} description={description} path="/404" noindex jsonLd={false}>
+  <section class="erro on-navy navy-field" id="erro" aria-labelledby="erro-h">
+    <div class="erro__inner shell shell--wide">
+      <div class="erro__copy">
+        <p class="kicker" data-reveal="fade">Erro 404</p>
+
+        <h1 class="h1 erro__title" id="erro-h" data-split>Não encontramos esta página.</h1>
+
+        <p class="lead erro__lead" data-reveal style="--i:1">
+          O endereço pode ter mudado de lugar, ter sido removido ou vir de um link antigo. O
+          conteúdo do site continua todo no ar — escolha abaixo por onde seguir.
+        </p>
+
+        <div class="erro__cta cluster" data-reveal style="--i:2">
+          <a class="btn btn--gold magnetic" href={waMsg} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={18} class="btn__ico" />
+            <span>Falar com um contador</span>
+          </a>
+          <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
+            <Icon name="phone" size={16} class="btn__ico" />
+            <span>{contact.phoneLabel}</span>
+          </a>
+        </div>
+
+        <p class="erro__note" data-reveal="fade" style="--i:3">
+          <Icon name="info" size={15} />
+          <span>{contact.responseTime}</span>
+        </p>
+      </div>
+
+      <div class="erro__art" data-reveal="scale" style="--i:1" aria-hidden="true">
+        <div class="erro__artinner">
+          <svg class="erro__svg" viewBox="0 0 320 200" role="presentation" focusable="false">
+            <g class="erro__grid">
+              <path d="M20 8V192M60 8V192M100 8V192M140 8V192M180 8V192M220 8V192M260 8V192M300 8V192"
+              ></path>
+              <path d="M8 24H312M8 64H312M8 104H312M8 144H312M8 184H312"></path>
+            </g>
+
+            <path class="erro__base" d="M18 176H302"></path>
+            <path class="erro__route" d="M34 164 92 140 140 110 170 88"></path>
+            <path class="erro__gap" d="M184 78 218 60 252 42"></path>
+
+            <g class="erro__dead">
+              <circle cx="170" cy="88" r="9"></circle>
+              <path d="m166 84 8 8M174 84l-8 8"></path>
+            </g>
+
+            <path class="erro__back" d="M170 88C142 118 96 136 48 156"></path>
+            <path class="erro__head" d="m34 162 19-6-3 14Z"></path>
+            <circle class="erro__home" cx="34" cy="162" r="4"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="shell shell--wide">
+      <nav class="erro__rotas" aria-labelledby="rotas-h">
+        <h2 class="kicker erro__rotash" id="rotas-h" data-reveal="fade">Caminhos de volta</h2>
+        <ul class="erro__list">
+          {
+            rotas.map((r, i) => (
+              <li data-reveal style={`--i:${i}`}>
+                <a class="rota card card--hover" href={r.href}>
+                  <span class="card__rule" aria-hidden="true" />
+                  <span class="icobox">
+                    <Icon name={r.icon} size={20} />
+                  </span>
+                  <span class="rota__text">
+                    <span class="rota__label">{r.label}</span>
+                    <span class="rota__hint">{r.hint}</span>
+                  </span>
+                  <span class="rota__go" aria-hidden="true">
+                    <Icon name="chevronRight" size={16} />
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .erro {
+    position: relative;
+    margin-top: -68px;
+    padding-top: calc(68px + clamp(2.5rem, 1.4rem + 5vw, 5rem));
+    padding-bottom: clamp(3rem, 2rem + 5vw, 6rem);
+    overflow: clip;
+  }
+  .erro__inner {
+    display: grid;
+    gap: clamp(2.25rem, 1rem + 5vw, 4rem);
+    align-items: center;
+  }
+  .erro__copy {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+    max-width: 56ch;
+  }
+  .erro__title {
+    max-width: 16ch;
+  }
+  .erro__lead {
+    max-width: 48ch;
+  }
+  .erro__cta {
+    gap: var(--s-3);
+  }
+  .erro__note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: var(--fs-sm);
+    color: var(--fg-mute);
+  }
+  .erro__note :global(svg) {
+    flex: none;
+    color: var(--accent);
+  }
+
+  /* ---------- grafismo: grade, rota interrompida e caminho de volta ---------- */
+  .erro__art {
+    display: grid;
+    place-items: center;
+  }
+  .erro__artinner {
+    position: relative;
+    width: min(100%, 460px);
+    padding: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
+  }
+  .erro__artinner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in srgb, var(--accent-fill) 20%, transparent);
+    border-radius: var(--r-4);
+    background: radial-gradient(
+      72% 60% at 50% 34%,
+      color-mix(in srgb, var(--navy-500) 32%, transparent),
+      transparent 72%
+    );
+  }
+  .erro__svg {
+    position: relative;
+    width: 100%;
+    height: auto;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .erro__grid path {
+    stroke: var(--line);
+    stroke-width: 1;
+    animation: gridIn var(--d-4) var(--e-out) both;
+  }
+  .erro__grid path:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  @keyframes gridIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .erro__base {
+    stroke: var(--line-strong);
+    stroke-width: 1.5;
+    stroke-dasharray: 290;
+    stroke-dashoffset: 290;
+    animation: draw var(--d-4) var(--e-out) 0.1s both;
+  }
+  .erro__route {
+    stroke: var(--silver-300);
+    stroke-width: 2.5;
+    stroke-dasharray: 175;
+    stroke-dashoffset: 175;
+    animation: draw var(--d-4) var(--e-out) 0.25s both;
+  }
+  .erro__gap {
+    stroke: var(--gold-400);
+    stroke-width: 2;
+    stroke-dasharray: 5 8;
+    animation: gapIn var(--d-3) var(--e-out) 0.62s both;
+  }
+  @keyframes gapIn {
+    from {
+      opacity: 0;
+      transform: translate3d(-6px, 5px, 0);
+    }
+    to {
+      opacity: 0.6;
+      transform: none;
+    }
+  }
+  .erro__dead {
+    stroke: var(--gold-400);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: deadIn var(--d-3) var(--e-out) 0.58s both;
+  }
+  @keyframes deadIn {
+    from {
+      opacity: 0;
+      transform: scale(0.55);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .erro__back {
+    stroke: var(--gold-500);
+    stroke-width: 2.5;
+    stroke-dasharray: 210;
+    stroke-dashoffset: 210;
+    animation: draw var(--d-4) var(--e-out) 0.7s both;
+  }
+  .erro__head {
+    fill: var(--gold-400);
+    stroke: none;
+    animation: headIn var(--d-3) var(--e-out) 0.95s both;
+  }
+  .erro__home {
+    fill: none;
+    stroke: var(--gold-400);
+    stroke-width: 1.5;
+    animation: headIn var(--d-3) var(--e-out) 1s both;
+  }
+  @keyframes headIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Rede de segurança: sem espera, sem deslocamento e nada invisível quando o
+     movimento é reduzido ou quando o motor falha. */
+  :global(html.motion-reduced) .erro__svg *,
+  :global(html.motion-failed) .erro__svg * {
+    animation-delay: 0s;
+    animation-duration: 0.01ms;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+
+  /* ---------- caminhos de volta ---------- */
+  .erro__rotas {
+    margin-top: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--line);
+  }
+  .erro__rotash {
+    margin-bottom: var(--s-5);
+  }
+  .erro__list {
+    display: grid;
+    gap: var(--s-4);
+    grid-template-columns: 1fr;
+  }
+  .rota {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    height: 100%;
+    padding: var(--s-4) var(--s-5);
+  }
+  .rota__text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .rota__label {
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .rota__hint {
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--fg-mute);
+  }
+  .rota__go {
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    opacity: 0.6;
+    transition:
+      transform var(--d-2) var(--e-out),
+      opacity var(--d-2) var(--e-out);
+  }
+  .rota:hover .rota__go {
+    transform: translateX(3px);
+    opacity: 1;
+  }
+
+  @media (min-width: 620px) {
+    .erro__list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 900px) {
+    .erro__inner {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+  @media (min-width: 1040px) {
+    .erro__list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 899px) {
+    .erro__art {
+      order: -1;
+    }
+    .erro__artinner {
+      width: min(100%, 400px);
+    }
+  }
+</style>

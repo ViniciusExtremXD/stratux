@@ -1,0 +1,519 @@
+---
+import Icon from '~/components/Icon.astro';
+import { brand, contact, legal, regions, wa } from '~/data/site';
+
+/**
+ * Prova social honesta.
+ *
+ * O cliente ainda não forneceu depoimentos. Enquanto o array abaixo estiver
+ * vazio, a seção renderiza o bloco-convite; assim que ele receber itens, o
+ * grid de depoimentos assume o lugar — sem tocar em mais nenhum arquivo.
+ *
+ * Grid simples, e não carrossel: com a lista vazia não há o que rodar, e um
+ * grid continua legível sem JavaScript e navegável por teclado.
+ */
+type Testimonial = { quote: string; author: string; role: string };
+
+const testimonials: Testimonial[] = [];
+
+const addr = legal.address;
+
+const waTestimonial = wa(
+  'Olá! Sou cliente da Stratux e quero enviar um depoimento para o site.',
+);
+---
+
+<section class="prova section section--tight" id="prova" aria-labelledby="prova-h">
+  <div class="shell">
+    <div class="sechead">
+      <p class="kicker" data-reveal="fade">Prova</p>
+      <h2 class="h2" id="prova-h" data-split>
+        O que já dá para conferir — e o que ainda vai entrar aqui.
+      </h2>
+      <p class="lead" data-reveal style="--i:1">
+        Depoimento sem autorização não é prova, é enfeite. Enquanto os primeiros não chegam
+        assinados, mostramos o que pode ser verificado agora: identificação legal, praças de
+        atendimento e o compromisso de resposta.
+      </p>
+    </div>
+
+    <div class="prova__cols">
+      <div class="prova__main">
+        {/* TODO cliente: depoimentos com autorização de uso */}
+        {
+          testimonials.length > 0 ? (
+            <ul class="quotes">
+              {testimonials.map((t, i) => (
+                <li class="quote card card--hover" data-reveal style={`--i:${i % 3}`}>
+                  <span class="card__rule" aria-hidden="true" />
+                  <blockquote class="quote__text">
+                    <p>{t.quote}</p>
+                  </blockquote>
+                  <footer class="quote__by">
+                    <span class="quote__author">{t.author}</span>
+                    <span class="quote__role">{t.role}</span>
+                  </footer>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div class="convite card" data-reveal aria-labelledby="prova-convite-h">
+              <span class="icobox">
+                <Icon name="handshake" size={21} />
+              </span>
+
+              <h3 class="h3 convite__title" id="prova-convite-h">
+                Este espaço é de quem já é cliente.
+              </h3>
+
+              <p class="convite__text">
+                Ainda não publicamos depoimentos. Não escrevemos elogio no lugar de ninguém e não
+                colocamos frase assinada por “cliente satisfeito”. Quando os primeiros chegarem
+                autorizados, eles aparecem exatamente aqui — com nome, empresa e cargo reais.
+              </p>
+
+              <div class="slot" aria-hidden="true">
+                <span class="slot__quote">“</span>
+                <span class="slot__line" />
+                <span class="slot__line" />
+                <span class="slot__line" />
+                <span class="slot__by" />
+              </div>
+
+              <ul class="convite__reqs">
+                <li class="req">
+                  <Icon name="check" size={15} />
+                  <span>Autorização de uso por escrito, antes de qualquer publicação.</span>
+                </li>
+                <li class="req">
+                  <Icon name="check" size={15} />
+                  <span>Nome, empresa e cargo conferidos com quem assina.</span>
+                </li>
+                <li class="req">
+                  <Icon name="check" size={15} />
+                  <span>Texto na palavra do cliente, sem reescrita nossa.</span>
+                </li>
+                <li class="req">
+                  <Icon name="check" size={15} />
+                  <span>Retirado do ar a qualquer momento, a pedido.</span>
+                </li>
+              </ul>
+
+              <a
+                class="btn btn--gold convite__cta"
+                href={waTestimonial}
+                target="_blank"
+                rel="noopener"
+              >
+                <Icon name="whatsapp" size={17} class="btn__ico" />
+                <span>Quero enviar um depoimento</span>
+              </a>
+
+              <p class="convite__foot xs mute">
+                Você manda pelo WhatsApp e aprova o texto final antes de ele ir ao ar.
+              </p>
+            </div>
+          )
+        }
+      </div>
+
+      <aside class="ficha card" data-reveal="left" style="--i:1" aria-labelledby="prova-ficha-h">
+        <div class="ficha__head">
+          <span class="icobox">
+            <Icon name="stamp" size={21} />
+          </span>
+          <div>
+            <h3 class="h4" id="prova-ficha-h">Identificação legal</h3>
+            <p class="ficha__sub">Dados verificáveis antes de assinar contrato.</p>
+          </div>
+        </div>
+
+        <dl class="ficha__list">
+          <div class="ficha__row">
+            <dt class="ficha__k">Razão social</dt>
+            <dd class="ficha__v">{brand.legalName}</dd>
+          </div>
+          <div class="ficha__row">
+            <dt class="ficha__k">CNPJ</dt>
+            <dd class="ficha__v num">{brand.cnpj}</dd>
+          </div>
+          <div class="ficha__row">
+            <dt class="ficha__k">Sede</dt>
+            <dd class="ficha__v">{addr.street} — {addr.city}/{addr.state}</dd>
+          </div>
+          <div class="ficha__row">
+            <dt class="ficha__k">Registro profissional</dt>
+            <dd class="ficha__v">
+              {/* TODO cliente: número do CRC-SP e responsável técnico */}
+              {
+                legal.crc ? (
+                  <span>{legal.crc}</span>
+                ) : (
+                  <span class="ficha__pending">
+                    <Icon name="clock" size={14} />
+                    <span>CRC-SP — publicamos aqui assim que confirmado.</span>
+                  </span>
+                )
+              }
+            </dd>
+          </div>
+        </dl>
+
+        <p class="ficha__note">
+          <Icon name="search" size={15} />
+          <span>
+            Confira o CNPJ na base pública da Receita Federal antes de fechar com qualquer
+            escritório — com a gente inclusive.
+          </span>
+        </p>
+      </aside>
+    </div>
+
+    <div class="selos" data-reveal="fade" style="--i:2">
+      <div class="selos__head">
+        <p class="kicker kicker--bare">Onde atendemos</p>
+        <p class="selos__resp">
+          <Icon name="clock" size={15} />
+          <span>{contact.responseTime}</span>
+        </p>
+      </div>
+
+      <ul class="pracas">
+        {
+          regions.map((r) => (
+            <li class="praca">
+              <span class="praca__top">
+                <Icon name="pin" size={15} />
+                <span class="praca__city">{r.city}</span>
+                <span class={r.role === 'Matriz' ? 'badge badge--gold' : 'badge'}>{r.role}</span>
+              </span>
+              <span class="praca__covers">{r.covers}</span>
+              <span class="praca__detail">{r.detail}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .prova {
+    background: var(--bone-dim);
+    border-block: 1px solid var(--line);
+  }
+
+  .prova__cols {
+    display: grid;
+    gap: var(--s-5);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  /* ---------- convite (estado sem depoimentos) ---------- */
+  .convite {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+  .convite__title {
+    margin-top: var(--s-1);
+    max-width: 22ch;
+  }
+  .convite__text {
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    color: var(--fg-soft);
+    max-width: 58ch;
+  }
+
+  /* espaço reservado — a vinheta do depoimento que ainda não chegou */
+  .slot {
+    position: relative;
+    display: grid;
+    gap: 0.6rem;
+    padding: var(--s-5) var(--s-5) var(--s-5) calc(var(--s-5) + 1.75rem);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-2);
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+  }
+  .slot__quote {
+    position: absolute;
+    left: var(--s-4);
+    top: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.32;
+  }
+  .slot__line,
+  .slot__by {
+    height: 9px;
+    border-radius: var(--r-pill);
+    background: var(--line-strong);
+    opacity: 0.55;
+    animation: slotWait 3.8s var(--e-inout) infinite;
+  }
+  .slot__line:nth-child(2) {
+    width: 100%;
+  }
+  .slot__line:nth-child(3) {
+    width: 92%;
+    animation-delay: 0.22s;
+  }
+  .slot__line:nth-child(4) {
+    width: 64%;
+    animation-delay: 0.44s;
+  }
+  .slot__by {
+    width: 38%;
+    height: 11px;
+    margin-top: 0.35rem;
+    background: var(--accent-fill);
+    opacity: 0.4;
+    animation-delay: 0.66s;
+  }
+  @keyframes slotWait {
+    0%,
+    100% {
+      opacity: 0.38;
+    }
+    50% {
+      opacity: 0.72;
+    }
+  }
+
+  .convite__reqs {
+    display: grid;
+    gap: var(--s-3);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .req {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    color: var(--fg-soft);
+  }
+  .req :global(svg) {
+    flex: none;
+    margin-top: 4px;
+    color: var(--accent);
+  }
+
+  .convite__cta {
+    justify-self: start;
+    margin-top: var(--s-1);
+  }
+  .convite__foot {
+    max-width: 48ch;
+  }
+
+  /* ---------- depoimentos (quando existirem) ---------- */
+  .quotes {
+    display: grid;
+    gap: var(--s-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    align-items: start;
+  }
+  .quote {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+  .quote__text {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .quote__by {
+    display: grid;
+    gap: 0.1rem;
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--line);
+  }
+  .quote__author {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  .quote__role {
+    font-size: var(--fs-xs);
+    color: var(--fg-mute);
+  }
+
+  /* ---------- ficha de identificação ---------- */
+  .ficha {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+  }
+  .ficha__head {
+    display: flex;
+    gap: var(--s-4);
+    align-items: flex-start;
+  }
+  .ficha__sub {
+    margin-top: 0.2rem;
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--fg-mute);
+  }
+  .ficha__list {
+    display: grid;
+  }
+  .ficha__row {
+    display: grid;
+    gap: 0.2rem;
+    padding-block: var(--s-3);
+    border-top: 1px solid var(--line);
+  }
+  .ficha__row:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .ficha__row:last-child {
+    padding-bottom: 0;
+  }
+  .ficha__k {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .ficha__v {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .ficha__pending {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: flex-start;
+    font-weight: 500;
+    color: var(--fg-mute);
+  }
+  .ficha__pending :global(svg) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--accent);
+  }
+  .ficha__note {
+    display: flex;
+    gap: var(--s-3);
+    align-items: flex-start;
+    padding: var(--s-4);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--fg-mute);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-2);
+  }
+  .ficha__note :global(svg) {
+    flex: none;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+
+  /* ---------- selos de atendimento ---------- */
+  .selos {
+    display: grid;
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .selos__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+    align-items: center;
+    justify-content: space-between;
+  }
+  .selos__resp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.42rem 0.9rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--fg-soft);
+    background: var(--bg-raised);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: var(--r-pill);
+  }
+  .selos__resp :global(svg) {
+    flex: none;
+    color: var(--accent);
+  }
+
+  .pracas {
+    display: grid;
+    gap: var(--s-3);
+    grid-template-columns: 1fr;
+  }
+  .praca {
+    display: grid;
+    gap: 0.25rem;
+    padding: var(--s-4);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      box-shadow var(--d-3) var(--e-out),
+      transform var(--d-3) var(--e-out);
+  }
+  .praca:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--sh-2);
+    transform: translateY(-2px);
+  }
+  .praca__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .praca__top :global(svg) {
+    flex: none;
+    color: var(--accent);
+  }
+  .praca__city {
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .praca__covers {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .praca__detail {
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+    color: var(--fg-mute);
+  }
+
+  @media (min-width: 640px) {
+    .pracas {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 900px) {
+    .prova__cols {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--s-6);
+    }
+  }
+  @media (min-width: 1040px) {
+    .pracas {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
