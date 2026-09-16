@@ -215,16 +215,20 @@ const lastValue = values.length - 1;
     height: 2px;
     background: linear-gradient(90deg, var(--accent-fill), transparent 84%);
     transform-origin: 0 50%;
-    animation: mvBar var(--d-5) var(--e-out) 0.12s both;
   }
-  @keyframes mvBar {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
+  :global(html.js) .mv__bar {
+    transform: scaleX(0);
+    transition: transform var(--d-5) var(--e-out) calc(var(--i, 0) * 120ms + 0.15s);
   }
+  :global(html.js) .mv__block.is-in .mv__bar {
+    transform: scaleX(1);
+  }
+  :global(html.motion-reduced) .mv__bar,
+  :global(html.motion-failed) .mv__bar {
+    transform: none !important;
+    transition: none !important;
+  }
+
   .mv__head {
     display: flex;
     align-items: center;
@@ -241,17 +245,23 @@ const lastValue = values.length - 1;
     height: auto;
     color: var(--silver-400);
     opacity: 0.85;
-    animation: mvMark var(--d-5) var(--e-out) 0.28s both;
   }
-  @keyframes mvMark {
-    from {
-      opacity: 0;
-      transform: rotate(-10deg) scale(0.86);
-    }
-    to {
-      opacity: 0.85;
-      transform: none;
-    }
+  :global(html.js) .mv__mark {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.86);
+    transition:
+      opacity var(--d-5) var(--e-out) calc(var(--i, 0) * 120ms + 0.25s),
+      transform var(--d-5) var(--e-out) calc(var(--i, 0) * 120ms + 0.25s);
+  }
+  :global(html.js) .mv__block.is-in .mv__mark {
+    opacity: 0.85;
+    transform: none;
+  }
+  :global(html.motion-reduced) .mv__mark,
+  :global(html.motion-failed) .mv__mark {
+    opacity: 0.85 !important;
+    transform: none !important;
+    transition: none !important;
   }
   .mv__text {
     font-family: var(--font-display);
@@ -460,29 +470,32 @@ const lastValue = values.length - 1;
     inset: 0 auto auto 0;
     width: 72px;
     height: 2px;
-    animation: cornerH var(--d-4) var(--e-out) 0.15s both;
   }
   .team__corner--v {
     inset: 0 auto auto 0;
     width: 2px;
     height: 72px;
-    animation: cornerV var(--d-4) var(--e-out) 0.25s both;
   }
-  @keyframes cornerH {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
+  :global(html.js) .team__corner--h {
+    transform: scaleX(0);
+    transform-origin: 0 0;
+    transition: transform var(--d-4) var(--e-out) 0.18s;
   }
-  @keyframes cornerV {
-    from {
-      transform: scaleY(0);
-    }
-    to {
-      transform: scaleY(1);
-    }
+  :global(html.js) .team.is-in .team__corner--h {
+    transform: scaleX(1);
+  }
+  :global(html.js) .team__corner--v {
+    transform: scaleY(0);
+    transform-origin: 0 0;
+    transition: transform var(--d-4) var(--e-out) 0.28s;
+  }
+  :global(html.js) .team.is-in .team__corner--v {
+    transform: scaleY(1);
+  }
+  :global(html.motion-reduced) .team__corner,
+  :global(html.motion-failed) .team__corner {
+    transform: none !important;
+    transition: none !important;
   }
 
   .team__portrait-wrap {
@@ -579,6 +592,25 @@ const lastValue = values.length - 1;
     gap: 2px;
     padding-block: var(--s-3);
     border-bottom: 1px solid var(--line);
+  }
+  :global(html.js) .team .ficha__row {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.45s var(--e-out),
+      transform 0.45s var(--e-out);
+  }
+  :global(html.js) .team.is-in .ficha__row:nth-child(1) { transition-delay: 0.12s; opacity: 1; transform: none; }
+  :global(html.js) .team.is-in .ficha__row:nth-child(2) { transition-delay: 0.18s; opacity: 1; transform: none; }
+  :global(html.js) .team.is-in .ficha__row:nth-child(3) { transition-delay: 0.24s; opacity: 1; transform: none; }
+  :global(html.js) .team.is-in .ficha__row:nth-child(4) { transition-delay: 0.30s; opacity: 1; transform: none; }
+  :global(html.js) .team.is-in .ficha__row:nth-child(5) { transition-delay: 0.36s; opacity: 1; transform: none; }
+  :global(html.js) .team.is-in .ficha__row:nth-child(6) { transition-delay: 0.42s; opacity: 1; transform: none; }
+  :global(html.motion-reduced) .team .ficha__row,
+  :global(html.motion-failed) .team .ficha__row {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
   .ficha dt {
     font-size: var(--fs-xs);

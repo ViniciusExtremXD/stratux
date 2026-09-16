@@ -43,7 +43,7 @@ const askHref = wa(
       <ul class="faq__list">
         {
           faq.map((item, i) => (
-            <li class="faq__item" data-reveal style={`--i:${i % 3}`}>
+            <li class="faq__item" data-reveal style={`--i:${i}`}>
               <details class="qa" open={i === 0}>
                 <summary class="qa__q">
                   <span class="qa__n num" aria-hidden="true">

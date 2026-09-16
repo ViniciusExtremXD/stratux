@@ -634,6 +634,20 @@ html.motion-reduced {
 .card--hover:hover .card__rule {
   opacity: 1;
 }
+html.js .card[data-reveal] .card__rule {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 1;
+  transition: transform 0.65s var(--e-out) calc(var(--i, 0) * var(--stagger) + 0.18s);
+}
+html.js .card[data-reveal].is-in .card__rule {
+  transform: scaleX(1);
+}
+html.motion-reduced .card[data-reveal] .card__rule,
+html.motion-failed .card[data-reveal] .card__rule {
+  transform: none !important;
+  transition: none !important;
+}
 
 /* Ícone em caixa */
 .icobox {

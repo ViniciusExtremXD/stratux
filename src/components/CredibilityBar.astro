@@ -156,6 +156,20 @@ const stats: Stat[] = [
     background: var(--accent-fill);
   }
 
+  :global(html.js) .cred__rule {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--d-4) var(--e-out) calc(var(--i, 0) * 80ms + 0.18s);
+  }
+  :global(html.js) .cred__item.is-in .cred__rule {
+    transform: scaleX(1);
+  }
+  :global(html.motion-reduced) .cred__rule,
+  :global(html.motion-failed) .cred__rule {
+    transform: none !important;
+    transition: none !important;
+  }
+
   .cred__num {
     display: block;
     font-size: clamp(2.35rem, 1.5rem + 3vw, 3.45rem);

@@ -498,17 +498,24 @@ const ctaHref = wa(
     height: 2px;
     background: linear-gradient(90deg, var(--accent-fill), transparent 70%);
     transform-origin: 0 50%;
-    animation: cdEdge var(--d-5) var(--e-out) 0.15s both;
   }
-  @keyframes cdEdge {
-    from {
-      transform: scaleX(0);
-      opacity: 0;
-    }
-    to {
-      transform: scaleX(1);
-      opacity: 1;
-    }
+
+  :global(html.js) .cd__edge {
+    transform: scaleX(0);
+    opacity: 0;
+    transition:
+      transform var(--d-5) var(--e-out) 0.15s,
+      opacity var(--d-5) var(--e-out) 0.15s;
+  }
+  :global(html.js) .cd.is-in .cd__edge {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  :global(html.motion-reduced) .cd__edge,
+  :global(html.motion-failed) .cd__edge {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
   }
   .obg[data-cd-state='hoje'] .cd {
     border-color: color-mix(in srgb, var(--accent) 55%, transparent);
