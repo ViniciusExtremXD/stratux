@@ -143,16 +143,19 @@ const waRegiao = wa(
   /* ------------------------------------------------------------- mapa */
   .mapa {
     margin: 0;
-    display: grid;
-    gap: var(--s-3);
+    display: flex;
+    flex-direction: column;
     padding: 0;
     overflow: hidden;
+    height: 100%;
   }
   .mapa__stage {
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
     background: var(--bone-dim);
+    flex: 1 1 auto;
+    min-height: 380px;
   }
   .mapa__frame {
     position: absolute;
@@ -165,10 +168,13 @@ const waRegiao = wa(
     transition: opacity var(--d-4) var(--e-soft);
   }
   .mapa__cap {
-    padding: var(--s-3) var(--s-4) var(--s-4);
+    flex: none;
+    padding: var(--s-3) var(--s-4);
     font-size: var(--fs-xs);
     line-height: 1.55;
     color: var(--fg-mute);
+    border-top: 1px solid var(--line);
+    background: var(--bg-raised);
   }
   .mapa__capitem {
     display: none;
@@ -177,51 +183,68 @@ const waRegiao = wa(
   /* ---------------------------------------------------------- lista de praças */
   .pracas {
     display: grid;
-    gap: var(--s-4);
+    gap: clamp(0.5rem, 0.4rem + 0.3vw, 0.75rem);
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
   .praca {
     display: grid;
-    gap: var(--s-3);
-    align-content: start;
+    gap: 0.35rem;
+    padding: clamp(0.75rem, 0.65rem + 0.3vw, 1rem) clamp(0.9rem, 0.8rem + 0.4vw, 1.25rem);
+    align-content: center;
     cursor: pointer;
+    border-radius: var(--r-2);
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    transition:
+      border-color var(--d-2) var(--e-out),
+      box-shadow var(--d-3) var(--e-out),
+      transform var(--d-3) var(--e-out),
+      background var(--d-2) var(--e-out);
   }
   .praca__head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--s-3);
+    justify-content: space-between;
+    gap: var(--s-2);
   }
   .praca__city {
     margin: 0;
+    font-size: clamp(1.05rem, 0.98rem + 0.2vw, 1.2rem);
+    font-weight: 600;
   }
   .praca__lbl {
-    display: block;
-    font-size: var(--fs-kicker);
-    font-weight: 600;
-    letter-spacing: 0.16em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--fg-mute);
-    line-height: 1.5;
   }
   .praca__covers {
-    display: grid;
-    gap: 0.1rem;
-    font-size: var(--fs-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--accent);
-    line-height: 1.45;
+    line-height: 1.4;
+    margin: 0;
   }
   .praca__detail {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
     color: var(--fg-mute);
-    line-height: 1.6;
+    line-height: 1.45;
+    margin: 0;
   }
   .praca__go {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-top: var(--s-1);
-    font-size: var(--fs-xs);
+    gap: 0.35rem;
+    margin-top: 1px;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -236,12 +259,10 @@ const waRegiao = wa(
   }
 
   /* estado ativo — a praça cujo mapa está visível */
-  .praca {
-    border-color: var(--line);
-    transition:
-      border-color var(--d-2) var(--e-out),
-      box-shadow var(--d-3) var(--e-out),
-      transform var(--d-3) var(--e-out);
+  .praca:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--sh-1);
+    transform: translateY(-1px);
   }
 
   /* --------------------------------------------------------------- rodapé */
@@ -280,6 +301,7 @@ const waRegiao = wa(
   .regioes__gate:has(#regiao-sorocaba:checked) .praca[for='regiao-sorocaba'] {
     border-color: var(--accent);
     box-shadow: var(--sh-2);
+    background: color-mix(in srgb, var(--accent) 3%, var(--bg-raised));
   }
   .regioes__gate:has(#regiao-sp:checked) .praca[for='regiao-sp'] .card__rule,
   .regioes__gate:has(#regiao-osasco:checked) .praca[for='regiao-osasco'] .card__rule,
@@ -311,16 +333,33 @@ const waRegiao = wa(
   }
   @media (min-width: 980px) {
     .regioes__body {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
       gap: clamp(2rem, 1rem + 3vw, 3.25rem);
+      align-items: stretch;
     }
     .pracas {
       grid-template-columns: minmax(0, 1fr);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .pracas > li {
+      flex: 1 1 0;
+      display: flex;
+    }
+    .praca {
+      width: 100%;
+      height: 100%;
+    }
+    .mapa {
+      height: 100%;
+      min-height: 100%;
     }
     .mapa__stage {
       aspect-ratio: auto;
       height: 100%;
-      min-height: 420px;
+      min-height: 480px;
     }
   }
 </style>
