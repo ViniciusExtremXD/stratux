@@ -62,30 +62,30 @@ const askHref = wa(
           ))
         }
       </ul>
+    </div>
 
-      <div class="faq__invite" data-reveal>
-        <span class="icobox faq__inviteico">
-          <Icon name="whatsapp" size={21} />
-        </span>
+    <div class="faq__invite" data-reveal>
+      <span class="icobox faq__inviteico">
+        <Icon name="whatsapp" size={21} />
+      </span>
 
-        <div class="faq__invitetext">
-          <h3 class="h4 faq__invitetitle">Sua dúvida não está aqui?</h3>
-          <p class="faq__invitep">
-            Descreva o seu caso em uma mensagem — quanto mais contexto sobre a empresa ou a sua
-            situação, mais precisa é a resposta. {contact.responseTime}
-          </p>
-        </div>
+      <div class="faq__invitetext">
+        <h3 class="h4 faq__invitetitle">Sua dúvida não está aqui?</h3>
+        <p class="faq__invitep">
+          Descreva o seu caso em uma mensagem — quanto mais contexto sobre a empresa ou a sua
+          situação, mais precisa é a resposta. {contact.responseTime}
+        </p>
+      </div>
 
-        <div class="faq__invitecta cluster">
-          <a class="btn btn--gold magnetic" href={askHref} target="_blank" rel="noopener">
-            <Icon name="whatsapp" size={17} class="btn__ico" />
-            <span>Perguntar pelo WhatsApp</span>
-          </a>
-          <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
-            <Icon name="phone" size={16} class="btn__ico" />
-            <span>{contact.phoneLabel}</span>
-          </a>
-        </div>
+      <div class="faq__invitecta cluster">
+        <a class="btn btn--gold magnetic" href={askHref} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={17} class="btn__ico" />
+          <span>Perguntar pelo WhatsApp</span>
+        </a>
+        <a class="btn btn--ghost" href={`tel:${contact.phoneE164}`}>
+          <Icon name="phone" size={16} class="btn__ico" />
+          <span>{contact.phoneLabel}</span>
+        </a>
       </div>
     </div>
   </div>
@@ -248,6 +248,7 @@ const askHref = wa(
     display: grid;
     gap: var(--s-4);
     align-items: center;
+    margin-top: clamp(2rem, 1.5rem + 2.5vw, 3.75rem);
     padding: clamp(1.35rem, 1rem + 1.3vw, 2rem);
     border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
     border-radius: var(--r-3);
@@ -298,11 +299,6 @@ const askHref = wa(
     }
     .faq__list {
       grid-column: 2;
-      grid-row: 1;
-    }
-    .faq__invite {
-      grid-column: 1 / -1;
-      margin-top: var(--s-3);
     }
   }
 </style>
