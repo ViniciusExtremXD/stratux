@@ -27,13 +27,14 @@ jobs:
 
       - run: npm ci
 
-      # Em GitHub Pages de projeto o site fica sob /<repo>/.
-      # Com domínio próprio (stratuxconsultoria.com.br), troque BASE_PATH por "/"
-      # e SITE_URL pelo domínio, e adicione o arquivo public/CNAME.
+      # Domínio próprio configurado (public/CNAME): serve na raiz de
+      # www.stratuxconsultoria.com.br, não em /<repo>/. Se o domínio for
+      # removido, volte BASE_PATH para /${{ github.event.repository.name }}
+      # e SITE_URL para https://${{ github.repository_owner }}.github.io.
       - name: Build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}
-          SITE_URL: https://${{ github.repository_owner }}.github.io
+          BASE_PATH: /
+          SITE_URL: https://www.stratuxconsultoria.com.br
         run: npm run build
 
       - uses: actions/configure-pages@v5

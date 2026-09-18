@@ -221,17 +221,20 @@ if (regIds.length === 4) {
     ? ok('mapa: só a matriz (sp) visível antes de qualquer clique')
     : no('mapa: estado inicial errado: ' + JSON.stringify(before));
 
-  const santosId = regIds.find((i) => /santos$/.test(i));
-  await page.evaluate((id) => document.getElementById(id).click(), santosId);
+  // qualquer praça que não seja a matriz — não fixar o nome da cidade aqui,
+  // a lista de praças pode mudar (já mudou: Santos virou Sorocaba).
+  const otherId = regIds.find((i) => !/-sp$/.test(i));
+  await page.evaluate((id) => document.getElementById(id).click(), otherId);
   await new Promise((r) => setTimeout(r, 950)); // supera a transição de 0.72s
   const after = await page.evaluate(() =>
     [...document.querySelectorAll('#atendimento .mapa__frame')]
       .map((f) => ({ id: f.dataset.mapa, visible: getComputedStyle(f).opacity !== '0' })),
   );
   const visibleAfter = after.filter((f) => f.visible).map((f) => f.id);
-  visibleAfter.length === 1 && visibleAfter[0] === 'santos'
-    ? ok('mapa: clicar em Santos troca para o mapa de Santos, só ele visível')
-    : no('mapa: troca de praça falhou: ' + JSON.stringify(after));
+  const otherMapaId = otherId.replace(/^regiao-/, '');
+  visibleAfter.length === 1 && visibleAfter[0] === otherMapaId
+    ? ok(`mapa: clicar em outra praça (${otherMapaId}) troca o mapa, só ele visível`)
+    : no('mapa: troca de praça falhou: ' + JSON.stringify({ otherId, after }));
 
   const iframeSrcOk = await page.evaluate(() =>
     [...document.querySelectorAll('#atendimento iframe[data-mapa]')].every(
