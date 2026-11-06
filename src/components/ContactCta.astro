@@ -350,8 +350,14 @@ const subjects = [...serviceAreas.map((a) => a.shortTitle), 'Outro'];
 
       if (fallback) fallback.href = url;
 
-      var win = window.open(url, '_blank', 'noopener');
+      /* Sem a flag 'noopener': com ela o window.open sempre devolve null, e
+         não daria para distinguir aba aberta de pop-up bloqueado. O vínculo
+         com esta janela é cortado logo em seguida. */
+      var win = window.open(url, '_blank');
       if (win) {
+        try {
+          win.opener = null;
+        } catch (e) {}
         say(
           'Tudo certo. Abrimos o WhatsApp com os seus dados — é só conferir e enviar na conversa.',
           true,

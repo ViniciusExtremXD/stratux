@@ -193,6 +193,57 @@ const errLive = await page.evaluate(() => {
 errLive.length ? ok('erro anunciado em aria-live: "' + errLive[0].slice(0, 70) + '"')
                : no('submit inválido não anunciou erro em aria-live');
 
+// submete preenchido com clique real: o WhatsApp abre e o site confirma
+await page.evaluate(() => {
+  document.querySelector('#ct-nome').value = 'Teste Automatizado';
+  document.querySelector('#ct-tel').value = '11999999999';
+  document.querySelector('#ct-lgpd').checked = true;
+  document.querySelector('#contato-form [data-submit]').scrollIntoView({ block: 'center' });
+});
+const formState = () => page.evaluate(() => {
+  const f = document.querySelector('#contato-form');
+  const box = f.querySelector('[data-msg]');
+  return {
+    text: f.querySelector('[data-msg-text]').textContent.trim(),
+    isOk: box.classList.contains('is-ok'),
+    fallback: f.querySelector('[data-wa-fallback]').classList.contains('is-on'),
+  };
+});
+const openedBefore = opened;
+await page.click('#contato-form [data-submit]');
+await new Promise((r) => setTimeout(r, 1500));
+const sent = await formState();
+opened === openedBefore + 1 ? ok('submit preenchido abre uma aba do WhatsApp')
+                            : no('submit preenchido abriu ' + (opened - openedBefore) + ' aba(s)');
+sent.isOk && !sent.fallback
+  ? ok('WhatsApp aberto mostra confirmação, sem aviso de bloqueio')
+  : no('WhatsApp aberto mostrou aviso errado: ' + JSON.stringify(sent));
+const waPage = (await browser.pages()).find((p) => p !== page && p.url() !== 'about:blank');
+if (waPage) {
+  const hasOpener = await waPage.evaluate(() => window.opener !== null).catch(() => null);
+  hasOpener === false ? ok('aba do WhatsApp sem acesso à janela do site')
+                      : no('aba do WhatsApp manteve window.opener: ' + hasOpener);
+  await waPage.close();
+} else {
+  no('aba do WhatsApp não encontrada');
+}
+
+// bloqueio real: o aviso e o link alternativo continuam aparecendo
+await page.evaluate(() => {
+  window.__open = window.open;
+  window.open = () => null;
+});
+await page.click('#contato-form [data-submit]');
+await new Promise((r) => setTimeout(r, 300));
+const blocked = await formState();
+!blocked.isOk && blocked.fallback
+  ? ok('pop-up bloqueado mostra aviso e link alternativo')
+  : no('pop-up bloqueado sem aviso: ' + JSON.stringify(blocked));
+await page.evaluate(() => {
+  window.open = window.__open;
+  document.querySelector('#contato-form').reset();
+});
+
 /* ---------- toggle de movimento ---------- */
 await page.evaluate(() => document.querySelector('[data-motion-toggle]').click());
 await new Promise((r) => setTimeout(r, 250));
