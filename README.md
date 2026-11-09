@@ -2,10 +2,10 @@
 
 Substitui o Google Sites em `stratuxconsultoria.com.br`. Astro estático, design
 system próprio em CSS puro, motor de movimento sem biblioteca externa, zero
-script de terceiro no documento principal. A única exceção é o mapa de
-atendimento (`#atendimento`): um `<iframe>` do Google Maps por praça, sem
-chave de API — é conteúdo real do próprio Google, não um script injetado na
-nossa página.
+script de terceiro no documento principal antes do consentimento. Há duas
+exceções: o mapa de atendimento (`#atendimento`), um `<iframe>` do Google Maps
+por praça, sem chave de API; e o Google Tag Manager, que só carrega depois que
+o visitante aceita os cookies de medição de anúncios (`docs/tracking.md`).
 
 ## Rodar
 
