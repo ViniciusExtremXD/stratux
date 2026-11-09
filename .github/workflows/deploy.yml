@@ -35,6 +35,9 @@ jobs:
         env:
           BASE_PATH: /
           SITE_URL: https://www.stratuxconsultoria.com.br
+          # Contêiner do Google Tag Manager (público). Vazio = sem aviso de
+          # cookies e sem medição. Passo a passo em docs/tracking.md.
+          PUBLIC_GTM_ID: GTM-MT63SBST
         run: npm run build
 
       - uses: actions/configure-pages@v5

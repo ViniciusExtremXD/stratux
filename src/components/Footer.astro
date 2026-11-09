@@ -1,7 +1,7 @@
 ---
 import Logo from '~/components/Logo.astro';
 import Icon from '~/components/Icon.astro';
-import { brand, contact, legal, regions, nav, waDefault } from '~/data/site';
+import { brand, contact, cookieNotice, legal, regions, nav, tracking, waDefault } from '~/data/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
 const year = 2026;
@@ -96,6 +96,14 @@ const addr = legal.address;
       </div>
       <div class="foot__legalside">
         <a href={`${base}/politica-de-privacidade`}>Política de privacidade</a>
+        {
+          tracking.gtmId && (
+            <button type="button" class="foot__motion" data-cookie-prefs>
+              <Icon name="shield" size={15} />
+              <span>{cookieNotice.prefs}</span>
+            </button>
+          )
+        }
         <button type="button" class="foot__motion" data-motion-toggle aria-pressed="false">
           <Icon name="motion" size={15} />
           <span data-motion-label>Animações ativas</span>

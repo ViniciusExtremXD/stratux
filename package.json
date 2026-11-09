@@ -12,6 +12,7 @@
     "verify:all": "node scripts-verify/verify.mjs --pages /,/politica-de-privacidade,/404",
     "verify:calc": "node scripts-verify/calc-test.mjs",
     "verify:interact": "node scripts-verify/interact.mjs",
+    "verify:tracking": "node scripts-verify/tracking.mjs",
     "shots": "node scripts-verify/shots.mjs"
   },
   "dependencies": {

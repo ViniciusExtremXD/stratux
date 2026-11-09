@@ -1,0 +1,249 @@
+---
+import { cookieNotice, tracking } from '~/data/site';
+
+/**
+ * Aviso de cookies e medição de anúncios. Ver docs/tracking.md.
+ *
+ * Nada do Google é carregado antes do "Aceitar". Sem resposta ou com "Recusar",
+ * nenhum evento é registrado. Os eventos nunca levam o endereço do link: o texto
+ * do WhatsApp pode conter o que o visitante escreveu no formulário.
+ *
+ * O âncora tem altura zero e fica grudado no fim da página: o aviso acompanha a
+ * rolagem sem `position: fixed` e sem abrir espaço abaixo do rodapé.
+ */
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
+const { gtmId, consentKey } = tracking;
+---
+
+{
+  gtmId && (
+    <div class="cookie-anchor">
+      <aside class="cookie on-navy" data-cookie-notice aria-labelledby="cookie-h" hidden>
+        <div class="cookie__copy">
+          <h2 class="cookie__title" id="cookie-h">
+            {cookieNotice.title}
+          </h2>
+          <p class="cookie__text">
+            {cookieNotice.text}{' '}
+            <a href={`${base}/politica-de-privacidade#cookies`}>{cookieNotice.more}</a>
+          </p>
+        </div>
+        <div class="cookie__actions">
+          <button class="btn btn--gold" type="button" data-cookie-accept>
+            {cookieNotice.accept}
+          </button>
+          <button class="btn btn--ghost" type="button" data-cookie-reject>
+            {cookieNotice.reject}
+          </button>
+        </div>
+      </aside>
+    </div>
+  )
+}
+
+{
+  gtmId && (
+    <script is:inline define:vars={{ gtmId, consentKey }}>
+      (function () {
+        var notice = document.querySelector('[data-cookie-notice]');
+        var loaded = false;
+        var returnFocus = null;
+        var choice = null;
+        try {
+          choice = localStorage.getItem(consentKey);
+        } catch (e) {}
+
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+
+        function grant() {
+          window.dataLayer = window.dataLayer || [];
+          if (loaded) {
+            gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted' });
+            return;
+          }
+          loaded = true;
+          gtag('consent', 'default', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'denied',
+            analytics_storage: 'denied',
+          });
+          window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(gtmId);
+          document.head.appendChild(s);
+        }
+
+        function clearAdCookies() {
+          var parts = location.hostname.split('.');
+          document.cookie.split(';').forEach(function (c) {
+            var name = c.split('=')[0].trim();
+            if (name.indexOf('_gcl_') !== 0) return;
+            document.cookie = name + '=; Max-Age=0; path=/';
+            for (var i = 0; i < parts.length - 1; i++) {
+              document.cookie =
+                name + '=; Max-Age=0; path=/; domain=.' + parts.slice(i).join('.');
+            }
+          });
+        }
+
+        function deny() {
+          if (loaded) {
+            gtag('consent', 'update', { ad_storage: 'denied', ad_user_data: 'denied' });
+          }
+          clearAdCookies();
+        }
+
+        function close() {
+          notice.hidden = true;
+          if (returnFocus && returnFocus.focus) returnFocus.focus();
+          returnFocus = null;
+        }
+
+        function decide(value) {
+          choice = value;
+          try {
+            localStorage.setItem(consentKey, value);
+          } catch (e) {}
+          if (value === 'granted') grant();
+          else deny();
+          close();
+        }
+
+        function track(name, data) {
+          if (choice !== 'granted') return;
+          var entry = { event: name };
+          for (var k in data) entry[k] = data[k];
+          window.dataLayer.push(entry);
+        }
+
+        function originOf(a) {
+          if (a.classList.contains('fab')) return 'botao_flutuante';
+          if (a.closest('footer')) return 'rodape';
+          if (a.closest('header')) return 'topo';
+          var section = a.closest('section[id]');
+          return section ? section.id : 'outro';
+        }
+
+        document.addEventListener('click', function (ev) {
+          var el = ev.target;
+          if (!el || !el.closest) return;
+
+          if (el.closest('[data-cookie-accept]')) return decide('granted');
+          if (el.closest('[data-cookie-reject]')) return decide('denied');
+
+          var prefs = el.closest('[data-cookie-prefs]');
+          if (prefs) {
+            returnFocus = prefs;
+            notice.hidden = false;
+            notice.querySelector('[data-cookie-accept]').focus();
+            return;
+          }
+
+          var a = el.closest('a[href]');
+          if (!a || a.closest('[data-wa-fallback]')) return;
+          var href = a.getAttribute('href');
+          var name =
+            href.indexOf('https://wa.me/') === 0
+              ? 'contact_whatsapp'
+              : href.indexOf('tel:') === 0
+                ? 'contact_phone'
+                : href.indexOf('mailto:') === 0
+                  ? 'contact_email'
+                  : '';
+          if (name) track(name, { contact_origin: originOf(a) });
+        });
+
+        document.addEventListener('stratux:lead', function () {
+          track('generate_lead', { lead_source: 'formulario_contato' });
+        });
+
+        if (choice === 'granted') grant();
+        else if (choice !== 'denied') notice.hidden = false;
+      })();
+    </script>
+  )
+}
+
+<style>
+  .cookie-anchor {
+    --cookie-gap: clamp(0.9rem, 0.4rem + 1.4vw, 1.75rem);
+    position: sticky;
+    bottom: var(--cookie-gap);
+    z-index: 60;
+    height: 0;
+  }
+  .cookie {
+    position: absolute;
+    bottom: 0;
+    left: var(--cookie-gap);
+    display: grid;
+    gap: var(--s-4);
+    width: min(34rem, calc(100% - 2 * var(--cookie-gap)));
+    padding: var(--s-5);
+    background: var(--navy-850);
+    border: 1px solid var(--line-strong);
+    border-left: 2px solid var(--accent-fill);
+    border-radius: var(--r-3);
+    box-shadow: var(--sh-navy);
+    animation: cookieIn var(--d-3) var(--e-out) both;
+  }
+  .cookie[hidden] {
+    display: none;
+  }
+  .cookie__copy {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .cookie__title {
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--fg);
+  }
+  .cookie__text {
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--fg-soft);
+  }
+  .cookie__text a {
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .cookie__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+  @keyframes cookieIn {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 16px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  :global(html.motion-reduced) .cookie {
+    animation: none;
+  }
+
+  /* Abaixo desta largura o aviso sobe para não ficar sob o botão do WhatsApp. */
+  @media (max-width: 720px) {
+    .cookie-anchor {
+      bottom: calc(var(--cookie-gap) + 54px + var(--s-3));
+    }
+  }
+  @media print {
+    .cookie-anchor {
+      display: none;
+    }
+  }
+</style>

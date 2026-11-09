@@ -35,6 +35,24 @@ export const waDefault = wa(
   'Olá! Vim pelo site da Stratux e gostaria de falar sobre serviços contábeis.',
 );
 
+/**
+ * Medição de anúncios (Google Ads via Google Tag Manager). Ver docs/tracking.md.
+ * Sem PUBLIC_GTM_ID no build, o site não mostra o aviso nem carrega nada de terceiros.
+ */
+export const tracking = {
+  gtmId: import.meta.env.PUBLIC_GTM_ID ?? '',
+  consentKey: 'stratux:cookies',
+} as const;
+
+export const cookieNotice = {
+  title: 'Cookies de medição de anúncios',
+  text: 'Com a sua autorização, usamos cookies do Google para saber se os nossos anúncios geram contatos. O que você escreve no formulário não entra nessa medição.',
+  accept: 'Aceitar',
+  reject: 'Recusar',
+  more: 'Saiba mais',
+  prefs: 'Preferências de cookies',
+} as const;
+
 export const legal = {
   address: {
     street: 'Av. Eng. Luís Carlos Berrini, 1748',

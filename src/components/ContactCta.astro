@@ -350,6 +350,9 @@ const subjects = [...serviceAreas.map((a) => a.shortTitle), 'Outro'];
 
       if (fallback) fallback.href = url;
 
+      /* Só o aviso, sem dados: quem mede o lead é o CookieNotice, se autorizado. */
+      form.dispatchEvent(new CustomEvent('stratux:lead', { bubbles: true }));
+
       /* Sem a flag 'noopener': com ela o window.open sempre devolve null, e
          não daria para distinguir aba aberta de pop-up bloqueado. O vínculo
          com esta janela é cortado logo em seguida. */

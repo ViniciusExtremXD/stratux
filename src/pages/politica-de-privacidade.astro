@@ -1,16 +1,19 @@
 ---
 import Base from '~/layouts/Base.astro';
 import Icon from '~/components/Icon.astro';
-import { brand, contact, legal, wa } from '~/data/site';
+import { brand, contact, cookieNotice, legal, tracking, wa } from '~/data/site';
 
 /**
  * Política de privacidade — documento aplicável a este site, redigido para a
  * LGPD (Lei nº 13.709/2018).
  *
  * O texto descreve exatamente o que o site faz: formulário de contato que
- * conduz a conversa para o WhatsApp, nenhum cookie de rastreamento, nenhum
- * analytics de terceiro, e dois itens de armazenamento local que não saem do
- * aparelho do visitante.
+ * conduz a conversa para o WhatsApp, cookies de medição de anúncios somente
+ * com consentimento, nenhum analytics de terceiro, e itens de armazenamento
+ * local que não saem do aparelho do visitante.
+ *
+ * Quem acrescentar GA4, pixel, remarketing ou conversões otimizadas ao
+ * contêiner do Tag Manager precisa atualizar este texto (docs/tracking.md).
  *
  * Pendências com o cliente: revisão jurídica do texto e e-mail do encarregado
  * (DPO) — ver o bloco "Encarregado (DPO): a confirmar" na seção 10.
@@ -19,7 +22,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '') || '';
 const home = base || '/';
 const addr = legal.address;
 
-const updated = 'setembro de 2026';
+const updated = 'novembro de 2026';
 
 const waRights = wa(
   'Olá! Vim pela política de privacidade do site da Stratux e quero exercer um direito sobre os meus dados pessoais.',
@@ -196,8 +199,8 @@ const description =
             <span class="ppsec__n num">02</span>Quais dados coletamos
           </h2>
           <p>
-            Coletamos apenas o que você informa por vontade própria. O formulário de contato deste
-            site tem seis campos:
+            Diretamente, coletamos apenas o que você informa por vontade própria. O formulário de
+            contato deste site tem seis campos:
           </p>
           <dl class="ppdl">
             {
@@ -226,6 +229,12 @@ const description =
             do provedor de infraestrutura, não são usados pela Stratux para identificar você nem
             para publicidade.
           </p>
+          <p>
+            Somente se você aceitar os cookies de medição de anúncios (seção 8), o Google recebe
+            dados técnicos da sua visita, como endereço IP, tipo de navegador, a identificação do
+            clique no anúncio e a informação de que você acionou um contato pelo site. O conteúdo do
+            formulário e das suas mensagens não faz parte desses dados.
+          </p>
         </section>
 
         <!-- 03 -------------------------------------------------------------- -->
@@ -246,7 +255,12 @@ const description =
             </li>
             <li>
               manter registro do que foi contratado e do que foi entregue, para exercício regular de
-              direitos.
+              direitos;
+            </li>
+            <li>
+              somente se você aceitar, medir se os anúncios da Stratux no Google geram contatos,
+              para decidir onde anunciar. A Stratux vê apenas números agregados, não quem é cada
+              visitante.
             </li>
           </ul>
           <p class="ppstrong">
@@ -269,7 +283,8 @@ const description =
               <dt>Consentimento</dt>
               <dd>
                 Art. 7º, I. É o que acontece quando você preenche e envia o formulário ou nos escreve
-                pelo WhatsApp: você decide entregar aqueles dados para receber uma resposta. Pode ser
+                pelo WhatsApp: você decide entregar aqueles dados para receber uma resposta. É também
+                a base da medição de anúncios, que só começa quando você clica em Aceitar. Pode ser
                 revogado a qualquer momento.
               </dd>
             </div>
@@ -314,6 +329,10 @@ const description =
               confidencialidade.
             </li>
             <li>
+              <strong>Google</strong>, somente se você aceitar os cookies de medição de anúncios,
+              para contabilizar os contatos gerados pelos anúncios da Stratux.
+            </li>
+            <li>
               <strong>Órgãos públicos</strong>, quando a entrega é a própria finalidade do serviço
               contratado — Receita Federal, prefeitura, Junta Comercial, Caixa, eSocial e demais
               cadastros obrigatórios.
@@ -324,9 +343,9 @@ const description =
             </li>
           </ul>
           <p>
-            Não realizamos transferência internacional de dados com finalidade comercial. A
-            infraestrutura que hospeda este site pode operar servidores fora do Brasil; nesse caso, o
-            tratamento se limita ao necessário para exibir as páginas ao visitante.
+            A infraestrutura que hospeda este site pode operar servidores fora do Brasil; nesse caso,
+            o tratamento se limita ao necessário para exibir as páginas ao visitante. O Google também
+            pode tratar fora do Brasil os dados da medição de anúncios, quando você a autoriza.
           </p>
         </section>
 
@@ -350,11 +369,15 @@ const description =
               <strong>Dados tratados com base no seu consentimento:</strong> até a revogação, salvo
               quando houver outra base legal que imponha a conservação, conforme o art. 16 da LGPD.
             </li>
+            <li>
+              <strong>Cookies de medição de anúncios:</strong> até 90 dias no seu navegador, ou até
+              você recusar ou limpar os dados do site.
+            </li>
           </ul>
           <p>
-            Não fixamos aqui um número de anos porque o prazo varia conforme o documento e a lei que
-            o exige. A regra que seguimos é objetiva: guardar pelo tempo determinado pela legislação
-            e eliminar em seguida.
+            Para os documentos, não fixamos aqui um número de anos porque o prazo varia conforme o
+            documento e a lei que o exige. A regra que seguimos é objetiva: guardar pelo tempo
+            determinado pela legislação e eliminar em seguida.
           </p>
         </section>
 
@@ -382,16 +405,46 @@ const description =
             <span class="ppsec__n num">08</span>Cookies e armazenamento local
           </h2>
           <p class="ppstrong">
-            Este site não usa cookies de rastreamento, não tem pixel de rede social e não usa
-            nenhuma ferramenta de analytics de terceiros.
+            Este site só usa cookies de medição de anúncios se você autorizar. Ele não tem pixel de
+            rede social nem ferramenta de analytics de terceiros.
           </p>
           <p>
-            Não medimos a sua navegação, não perfilamos visitantes e não exibimos banner de
-            consentimento porque não há rastreamento a consentir. As fontes, as imagens e os scripts
-            da página são servidos pelo próprio domínio do site.
+            Ao entrar no site, você vê um aviso com as opções Aceitar e Recusar. Enquanto você não
+            aceitar, o Google Tag Manager não é carregado, nenhum cookie de medição é gravado e
+            nenhum contato é registrado. Recusar não muda nada na navegação nem no atendimento.
           </p>
           <p>
-            O site usa apenas o armazenamento local do seu próprio navegador, em três itens, para
+            Se você aceitar, o Google Ads passa a registrar quando alguém que veio de um anúncio
+            envia o formulário ou clica no WhatsApp, no telefone ou no e-mail. Esses dados não são
+            usados para remarketing nem para personalizar anúncios. Fora esse caso e o mapa descrito
+            na seção 11, as fontes, as imagens e os scripts da página são servidos pelo próprio
+            domínio do site.
+          </p>
+          <dl class="ppdl">
+            <div class="ppdl__row">
+              <dt><span class="ppkey">_gcl_au, _gcl_aw</span></dt>
+              <dd>
+                Cookies do Google Ads, gravados somente depois do Aceitar. Guardam a identificação do
+                clique no anúncio por até 90 dias, para ligar esse clique ao contato feito no site.
+              </dd>
+            </div>
+          </dl>
+          <p>
+            Você pode mudar de ideia quando quiser, pelo botão abaixo ou por “{cookieNotice.prefs}”
+            no rodapé. Se recusar depois de ter aceitado, apagamos esses cookies e paramos a medição.
+          </p>
+          {
+            tracking.gtmId && (
+              <div class="ppcta cluster">
+                <button class="btn btn--ghost" type="button" data-cookie-prefs>
+                  <Icon name="shield" size={16} class="btn__ico" />
+                  <span>{cookieNotice.prefs}</span>
+                </button>
+              </div>
+            )
+          }
+          <p>
+            O site também usa o armazenamento local do seu próprio navegador, em quatro itens, para
             que a página se comporte do jeito que você escolheu:
           </p>
           <dl class="ppdl">
@@ -400,6 +453,13 @@ const description =
               <dd>
                 Guarda se você desligou as animações pelo botão do rodapé, para que a preferência
                 continue valendo nas próximas visitas.
+              </dd>
+            </div>
+            <div class="ppdl__row">
+              <dt><span class="ppkey">stratux:cookies</span></dt>
+              <dd>
+                Guarda se você aceitou ou recusou os cookies de medição de anúncios, para não
+                perguntar de novo a cada visita.
               </dd>
             </div>
             <div class="ppdl__row">
@@ -419,11 +479,11 @@ const description =
             </div>
           </dl>
           <p>
-            Esses três itens ficam no seu aparelho, não identificam você, não são enviados para a
+            Esses quatro itens ficam no seu aparelho, não identificam você, não são enviados para a
             Stratux e não são compartilhados com ninguém. Os dois últimos são apagados sozinhos
             quando você fecha a aba. Para apagar todos, basta limpar os dados do site nas
             configurações do seu navegador — a única consequência é que o site volta ao
-            comportamento padrão.
+            comportamento padrão e pergunta de novo sobre os cookies.
           </p>
         </section>
 
@@ -508,6 +568,11 @@ const description =
             Os botões de WhatsApp deste site levam você para o aplicativo ou para o site do
             WhatsApp, operado pela Meta, que tem política de privacidade própria. O mesmo vale para
             os links de telefone, que acionam o discador do seu aparelho.
+          </p>
+          <p>
+            O mapa da seção de atendimento é um conteúdo incorporado do Google Maps, carregado
+            diretamente do Google, que pode registrar dados técnicos de acesso. Esse tratamento e o
+            da medição de anúncios também seguem a política de privacidade do Google.
           </p>
           <p>
             A partir do momento em que a conversa passa a acontecer nessas plataformas, o tratamento
