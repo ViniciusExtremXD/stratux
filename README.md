@@ -53,7 +53,7 @@ src/
   pages/          index, 404, política de privacidade, robots.txt, sitemap.xml
   scripts/        motion.ts — o motor de movimento, um módulo só
   styles/         global.css — o design system inteiro
-  assets/         logo (PNG transparente original do cliente)
+  assets/         logo (PNG transparente recortado da arte do cliente, 26/11/2026)
 scripts-verify/   pipeline de verificação
 CONTRACT.md       o contrato de design — leia antes de mexer no visual
 ```
@@ -125,7 +125,7 @@ funciona sem JavaScript, mostrando a matriz por padrão.
 
 ## Pendências com o cliente
 
-- Logo em vetor (SVG/AI). Hoje usamos o PNG transparente original.
+- Logo em vetor (SVG/AI). Hoje usamos PNG transparente recortado da arte enviada.
 - Endereço completo de Osasco, Jundiaí e Santos, para o mapa parar de mostrar
   só o pino da cidade.
 - Fotos reais da equipe e do escritório.

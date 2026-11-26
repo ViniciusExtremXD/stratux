@@ -1,20 +1,20 @@
 ---
 import { Image } from 'astro:assets';
 import mark from '~/assets/logo-mark.png';
+import word from '~/assets/logo-type.png';
+import motto_ from '~/assets/logo-motto.png';
 import lockup from '~/assets/logo-lockup.png';
 
 /**
- * Marca Stratux.
- * O monograma e o lockup vêm do PNG transparente original do cliente
- * (single source: src/assets/logo-*.png). O wordmark é composto em texto
- * quando precisa acompanhar o layout — com o X em dourado, como na marca.
+ * Marca Stratux (logo nova, 26/11/2026).
+ * S, nome e frase vêm recortados da arte enviada pelo cliente
+ * (single source: src/assets/logo-*.png, fundo transparente).
  *
  * TODO cliente: solicitar o arquivo vetorial (SVG/AI) para substituir o PNG.
  */
 interface Props {
   variant?: 'full' | 'mark' | 'lockup';
   size?: number;
-  tagline?: boolean;
   motto?: boolean;
   class?: string;
   eager?: boolean;
@@ -23,12 +23,15 @@ interface Props {
 const {
   variant = 'full',
   size = 44,
-  tagline = false,
   motto = false,
   class: cls = '',
   eager = false,
   title = 'Stratux Consultoria Empresarial',
 } = Astro.props;
+const ratio = mark.width / mark.height;
+const mw = (k: number) => Math.round(size * ratio * k);
+const wh = size * 0.42; // altura do nome ao lado do S
+const ww = (k: number) => Math.round(wh * (word.width / word.height) * k);
 ---
 
 {
@@ -36,7 +39,7 @@ const {
     <Image
       src={lockup}
       alt={title}
-      widths={[320, 520, 760, 1070]}
+      widths={[360, 540, 720, 843]}
       sizes="(max-width: 700px) 78vw, 520px"
       formats={['avif', 'webp']}
       loading={eager ? 'eager' : 'lazy'}
@@ -45,14 +48,14 @@ const {
       densities={undefined}
     />
   ) : (
-    <span class={`logo logo--${variant} ${cls}`} style={`--mk:${size}px`}>
+    <span class={`logo logo--${variant} ${cls}`} style={`--mk:${size}px;--mr:${ratio}`}>
       <Image
         src={mark}
         alt={variant === 'mark' ? title : ''}
-        width={Math.round(size * 1.152)}
+        width={mw(1)}
         height={size}
-        widths={[Math.round(size * 1.152), Math.round(size * 2.3), Math.round(size * 3.46)]}
-        sizes={`${Math.round(size * 1.152)}px`}
+        widths={[mw(1), mw(2), mw(3)]}
+        sizes={`${mw(1)}px`}
         formats={['avif', 'webp']}
         loading={eager ? 'eager' : 'lazy'}
         fetchpriority={eager ? 'high' : undefined}
@@ -61,11 +64,28 @@ const {
       />
       {variant === 'full' && (
         <span class="logo__type">
-          <span class="logo__word">
-            STRATU<span class="logo__x">X</span>
-          </span>
-          {tagline && <span class="logo__tag">Consultoria Empresarial</span>}
-          {motto && <span class="logo__motto">Estratégia · Gestão · Resultados</span>}
+          <Image
+            src={word}
+            alt="Stratux"
+            width={ww(1)}
+            height={Math.round(wh)}
+            widths={[ww(1), ww(2), ww(3)]}
+            sizes={`${ww(1)}px`}
+            formats={['avif', 'webp']}
+            loading={eager ? 'eager' : 'lazy'}
+            class="logo__word"
+          />
+          {motto && (
+            <Image
+              src={motto_}
+              alt="Estratégia · Gestão · Resultados"
+              widths={[ww(1), ww(2), ww(3)]}
+              sizes={`${ww(1)}px`}
+              formats={['avif', 'webp']}
+              loading={eager ? 'eager' : 'lazy'}
+              class="logo__motto"
+            />
+          )}
         </span>
       )}
     </span>
@@ -76,68 +96,35 @@ const {
   .logo {
     display: inline-flex;
     align-items: center;
-    gap: calc(var(--mk) * 0.26);
+    gap: calc(var(--mk) * 0.3);
     line-height: 1;
   }
   .logo__mark {
     flex: none;
     display: block;
-    width: calc(var(--mk) * 1.152);
+    width: calc(var(--mk) * var(--mr));
     height: var(--mk);
     object-fit: contain;
   }
   .logo__type {
     display: grid;
-    gap: calc(var(--mk) * 0.1);
+    justify-items: start;
+    gap: calc(var(--mk) * 0.16);
   }
   .logo__word {
-    font-family: var(--font-sans);
-    font-weight: 700;
-    font-size: calc(var(--mk) * 0.5);
-    letter-spacing: 0.19em;
-    color: var(--silver-100);
-    white-space: nowrap;
-    text-indent: 0.19em;
-  }
-  .logo__x {
-    color: var(--gold-400);
-  }
-  .logo__tag {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: calc(var(--mk) * 0.196);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold-400);
-    white-space: nowrap;
-    text-indent: 0.3em;
+    display: block;
+    height: calc(var(--mk) * 0.42);
+    width: auto;
   }
   .logo__motto {
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: calc(var(--mk) * 0.168);
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    color: var(--silver-300);
-    white-space: nowrap;
-    text-indent: 0.26em;
+    display: block;
+    width: calc(var(--mk) * 0.42 * 835 / 120);
+    height: auto;
   }
 
   .logo-lockup {
     width: min(78vw, 520px);
     height: auto;
     margin-inline: auto;
-  }
-
-  /* Em superfície clara a palavra vira tinta */
-  :global(.on-light) .logo__word {
-    color: var(--ink);
-  }
-  :global(.on-light) .logo__x,
-  :global(.on-light) .logo__tag {
-    color: var(--gold-700);
-  }
-  :global(.on-light) .logo__motto {
-    color: var(--ink-mute);
   }
 </style>
